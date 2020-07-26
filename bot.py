@@ -1,9 +1,13 @@
 import discord
 from discord.ext import commands
 
+TOKEN = 'NzEwOTAzMTI0NzI2MTIwNTA4.Xr7ONw.H1O1R6aLaOWZaUNgfvqdt9ptBOk'
+
 bot = commands.Bot(command_prefix = '>')
+bot.remove_command('help')
 
 testingID = 711212263062765608
+comandoID = 680757461606727710
 
 @bot.event
 async def on_ready():
@@ -11,4 +15,65 @@ async def on_ready():
     message = 'RapaxBot è pronto a salpare!'
     await channel.send(message)
 
-bot.run('NzEwOTAzMTI0NzI2MTIwNTA4.Xr7ONw.H1O1R6aLaOWZaUNgfvqdt9ptBOk')
+@bot.command()
+async def help(ctx):
+
+    embed = discord.Embed()
+    embed.title = 'RapaxBot'
+    embed.colour = discord.Colour.from_rgb(29, 228, 74)
+    embed.description = 'Il prefisso da usare è: `>`'
+    embed.add_field(name = '`CB giorno orario1 orario2...`', value = 'Genera in *com-del-comando* un messaggio per le Clan Battle', inline = False)
+    embed.add_field(name = '`cb giorno orario1 orario2...`', value = 'Genera in *com-del-comando* un messaggio per le Clan Brawl.', inline = False)
+    embed.add_field(name = '`edit channelID messageID "messaggio"`', value = 'modifica un messaggio con *messaggio*.', inline = False)
+    embed.add_field(name = '`vote`', value = 'Aggiunge delle reazioni all\'ultimo messaggio', inline = False)
+    await ctx.send(embed = embed)
+
+@bot.command()
+async def CB(ctx, *args):
+    channel = bot.get_channel(comandoID)
+    day = args[0]
+    i = 1
+    message = '<@&680766615234543662> perfavore segnalateci la vostra disponibilità per le Clan Battle!'
+    await channel.send(message)
+    while i < len(args):
+            hour = args[i]
+            message = 'Presenze delle Clan Battle di ' + day + ', ore: ' + hour
+            msg = await channel.send(message)
+            await msg.add_reaction("✅")
+            await msg.add_reaction("❌")
+            await msg.add_reaction("♻️")
+            i = i + 1
+
+@bot.command()
+async def cb(ctx, *args):
+    channel = bot.get_channel(comandoID)
+    day = args[0]
+    i = 1
+    message = '<@&680766615234543662> perfavore segnalateci la vostra disponibilità per le Clan Brawl!'
+    await channel.send(message)
+    while i < len(args):
+            hour = args[i]
+            message = 'Presenze delle Clan Brawl di ' + day + ', ore: ' + hour
+            msg = await channel.send(message)
+            await msg.add_reaction("✅")
+            await msg.add_reaction("❌")
+            await msg.add_reaction("♻️")
+            i = i + 1
+
+@bot.command()
+async def edit(ctx, channel_id, message_id, new_message):
+    guild = ctx.guild
+    channel = guild.get_channel(int(channel_id))
+    message = await channel.fetch_message(int(message_id))
+    await message.edit(content = new_message)
+
+@bot.command()
+async def vote(ctx):
+    author = ctx.message.author
+    channel = ctx.message.channel
+    await ctx.message.delete()
+    msg = await channel.history().get(author = author)
+    await msg.add_reaction("✅")
+    await msg.add_reaction("❌")
+
+bot.run(TOKEN)
