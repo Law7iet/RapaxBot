@@ -1,3 +1,4 @@
+import random
 import discord
 from discord.ext import commands
 
@@ -22,10 +23,10 @@ async def help(ctx):
     embed.title = 'RapaxBot'
     embed.colour = discord.Colour.from_rgb(29, 228, 74)
     embed.description = 'Il prefisso da usare è: `>`'
-    embed.add_field(name = '`CB giorno orario1 orario2...`', value = 'Genera in *com-del-comando* un messaggio per le Clan Battle', inline = False)
+    embed.add_field(name = '`CB giorno orario1 orario2...`', value = 'Genera in *com-del-comando* un messaggio per le Clan Battle.', inline = False)
     embed.add_field(name = '`cb giorno orario1 orario2...`', value = 'Genera in *com-del-comando* un messaggio per le Clan Brawl.', inline = False)
     embed.add_field(name = '`edit channelID messageID "messaggio"`', value = 'modifica un messaggio con *messaggio*.', inline = False)
-    embed.add_field(name = '`vote`', value = 'Aggiunge delle reazioni all\'ultimo messaggio', inline = False)
+    embed.add_field(name = '`vote`', value = 'Aggiunge delle reazioni all\'ultimo messaggio inviato dall\'autore.', inline = False)
     await ctx.send(embed = embed)
 
 @bot.command()
@@ -39,9 +40,9 @@ async def CB(ctx, *args):
             hour = args[i]
             message = 'Presenze delle Clan Battle di ' + day + ', ore: ' + hour
             msg = await channel.send(message)
-            await msg.add_reaction("✅")
-            await msg.add_reaction("❌")
-            await msg.add_reaction("♻️")
+            await msg.add_reaction('\U00002705')
+            await msg.add_reaction('\U0000274C')
+            await msg.add_reaction('\U0000267B')
             i = i + 1
 
 @bot.command()
@@ -55,9 +56,9 @@ async def cb(ctx, *args):
             hour = args[i]
             message = 'Presenze delle Clan Brawl di ' + day + ', ore: ' + hour
             msg = await channel.send(message)
-            await msg.add_reaction("✅")
-            await msg.add_reaction("❌")
-            await msg.add_reaction("♻️")
+            await msg.add_reaction('\U00002705')
+            await msg.add_reaction('\U0000274C')
+            await msg.add_reaction('\U0000267B')
             i = i + 1
 
 @bot.command()
@@ -73,7 +74,29 @@ async def vote(ctx):
     channel = ctx.message.channel
     await ctx.message.delete()
     msg = await channel.history().get(author = author)
-    await msg.add_reaction("✅")
-    await msg.add_reaction("❌")
+    await msg.add_reaction('\U00002705')
+    await msg.add_reaction('\U0000274C')
+
+@bot.command()
+async def randomize(ctx, message_id):
+    guild = ctx.guild
+    channel = guild.get_channel(int(comandoID))
+    message = await channel.fetch_message(int(message_id))
+    emoji = discord.utils.get(ctx.guild.emojis, name = 'rapax')
+    reaction = discord.utils.get(message.reactions, emoji = emoji)
+    users = await reaction.users().flatten()
+    partecipanti = len(users)
+    squadre = int(partecipanti / 3)
+    esclusi = partecipanti % 3
+    message = 'Ci sono {} partecipanti. Le squadre sono composte da 3 giocatori, quindi ci saranno: \n - {} squadre; \n - {} verranno esclusi.'.format(partecipanti, squadre, esclusi)
+    await ctx.send(message)
+    while(users):
+        user1 = random.choice(users)
+        users.remove(user1)
+        user2 = random.choice(users)
+        users.remove(user2)
+        user3 = random.choice(users)
+        users.remove(user3)
+        await ctx.send('Team: ' + user1.name + ', ' + user2.name + ', ' + user3.name + '.')
 
 bot.run(TOKEN)
