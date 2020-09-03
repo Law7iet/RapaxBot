@@ -88,9 +88,9 @@ async def randomize(ctx, message_id):
     partecipanti = len(users)
     squadre = int(partecipanti / 3)
     esclusi = partecipanti % 3
-    message = 'Ci sono {} partecipanti. Le squadre sono composte da 3 giocatori, quindi ci saranno: \n - {} squadre; \n - {} verranno esclusi.'.format(partecipanti, squadre, esclusi)
+    message = 'Ci sono {} partecipanti. Le squadre sono composte da 3 giocatori, quindi ci saranno: \n - {} squadre; \n - {} partecipanti verranno esclusi.'.format(partecipanti, squadre, esclusi)
     await ctx.send(message)
-    while(users):
+    while len(users) >= 3:
         user1 = random.choice(users)
         users.remove(user1)
         user2 = random.choice(users)
@@ -98,5 +98,25 @@ async def randomize(ctx, message_id):
         user3 = random.choice(users)
         users.remove(user3)
         await ctx.send('Team: ' + user1.name + ', ' + user2.name + ', ' + user3.name + '.')
+
+    message = 'Gli esclusi sono: '
+    while users:
+        user = random.choice(users)
+        users.remove(user)
+        message = message + '\n - ' + user.name
+
+    message = message + '.'
+    if esclusi > 0:
+        await ctx.send(message)
+
+@bot.command()
+async def dice(ctx):
+    dado = [1, 2, 3, 4, 5, 6]
+    await ctx.send(random.choice(dado))
+
+@bot.command()
+async def coin(ctx):
+    moneta = ['Testa', 'Croce']
+    await ctx.send(random.choice(moneta))
 
 bot.run(TOKEN)
