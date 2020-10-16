@@ -18,7 +18,6 @@ async def on_ready():
 
 @bot.command()
 async def help(ctx):
-
     embed = discord.Embed()
     embed.title = 'RapaxBot'
     embed.colour = discord.Colour.from_rgb(29, 228, 74)
@@ -26,7 +25,9 @@ async def help(ctx):
     embed.add_field(name = '`CB giorno orario1 orario2...`', value = 'Genera in *com-del-comando* un messaggio per le Clan Battle.', inline = False)
     embed.add_field(name = '`cb giorno orario1 orario2...`', value = 'Genera in *com-del-comando* un messaggio per le Clan Brawl.', inline = False)
     embed.add_field(name = '`edit channelID messageID "messaggio"`', value = 'modifica un messaggio con *messaggio*.', inline = False)
-    embed.add_field(name = '`vote`', value = 'Aggiunge delle reazioni all\'ultimo messaggio inviato dall\'autore.', inline = False)
+    embed.add_field(name = '`vote [message_ID]`', value = 'Aggiunge delle reazioni all\'ultimo messaggio inviato dall\'autore, oppure li aggiunge al messaggio avente l\'ID passato per parametro.', inline = False)
+    embed.add_field(name = '`dice`', value = 'Lancia un dado a 6 facce.', inline = False)
+    embed.add_field(name = '`coin`', value = 'Lancia una moneta.', inline = False)
     await ctx.send(embed = embed)
 
 @bot.command()
@@ -69,13 +70,31 @@ async def edit(ctx, channel_id, message_id, new_message):
     await message.edit(content = new_message)
 
 @bot.command()
-async def vote(ctx):
-    author = ctx.message.author
-    channel = ctx.message.channel
-    await ctx.message.delete()
-    msg = await channel.history().get(author = author)
-    await msg.add_reaction('\U00002705')
-    await msg.add_reaction('\U0000274C')
+async def vote(ctx, *args):
+    if len(args) == 0:
+        author = ctx.message.author
+        channel = ctx.message.channel
+        await ctx.message.delete()
+        msg = await channel.history().get(author = author)
+        await msg.add_reaction('\U00002705')
+        await msg.add_reaction('\U0000274C')
+    else:
+        message_id = args[0]
+        channel = ctx.message.channel
+        await ctx.message.delete()
+        msg = await channel.fetch_message(int(message_id))
+        await msg.add_reaction('\U00002705')
+        await msg.add_reaction('\U0000274C')
+
+@bot.command()
+async def dice(ctx):
+    dado = [1, 2, 3, 4, 5, 6]
+    await ctx.send(random.choice(dado))
+
+@bot.command()
+async def coin(ctx):
+    moneta = ['Testa', 'Croce']
+    await ctx.send(random.choice(moneta))
 
 @bot.command()
 async def randomize(ctx, message_id):
@@ -97,26 +116,14 @@ async def randomize(ctx, message_id):
         users.remove(user2)
         user3 = random.choice(users)
         users.remove(user3)
-        await ctx.send('Team: ' + user1.name + ', ' + user2.name + ', ' + user3.name + '.')
-
+        await ctx.send('Team: ' + user1.nick + ', ' + user2.nick + ', ' + user3.nick + '.')
     message = 'Gli esclusi sono: '
     while users:
         user = random.choice(users)
         users.remove(user)
-        message = message + '\n - ' + user.name
-
+        message = message + '\n - ' + user.nick
     message = message + '.'
     if esclusi > 0:
         await ctx.send(message)
-
-@bot.command()
-async def dice(ctx):
-    dado = [1, 2, 3, 4, 5, 6]
-    await ctx.send(random.choice(dado))
-
-@bot.command()
-async def coin(ctx):
-    moneta = ['Testa', 'Croce']
-    await ctx.send(random.choice(moneta))
 
 bot.run(TOKEN)
