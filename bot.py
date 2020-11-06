@@ -63,6 +63,12 @@ async def cb(ctx, *args):
             i = i + 1
 
 @bot.command()
+async def write(ctx, channel_id, message):
+    guild = ctx.guild
+    channel = guild.get_channel(int(channel_id))
+    await channel.send(message)
+
+@bot.command()
 async def edit(ctx, channel_id, message_id, new_message):
     guild = ctx.guild
     channel = guild.get_channel(int(channel_id))
@@ -70,21 +76,26 @@ async def edit(ctx, channel_id, message_id, new_message):
     await message.edit(content = new_message)
 
 @bot.command()
+async def add_reaction(ctx, message_id, emoji):
+    guild = ctx.guild
+    channel = ctx.message.channel
+    message = await channel.fetch_message(int(message_id))
+    await ctx.message.delete()
+    await message.add_reaction(emoji)
+
+@bot.command()
 async def vote(ctx, *args):
     if len(args) == 0:
         author = ctx.message.author
         channel = ctx.message.channel
-        await ctx.message.delete()
         msg = await channel.history().get(author = author)
-        await msg.add_reaction('\U00002705')
-        await msg.add_reaction('\U0000274C')
     else:
         message_id = args[0]
         channel = ctx.message.channel
-        await ctx.message.delete()
         msg = await channel.fetch_message(int(message_id))
-        await msg.add_reaction('\U00002705')
-        await msg.add_reaction('\U0000274C')
+    await ctx.message.delete()
+    await msg.add_reaction('\U00002705')
+    await msg.add_reaction('\U0000274C')
 
 @bot.command()
 async def dice(ctx):
