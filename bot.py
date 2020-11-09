@@ -20,14 +20,18 @@ async def on_ready():
 async def help(ctx):
     embed = discord.Embed()
     embed.title = 'RapaxBot'
-    embed.colour = discord.Colour.from_rgb(29, 228, 74)
-    embed.description = 'Il prefisso da usare è: `>`'
-    embed.add_field(name = '`CB giorno orario1 orario2...`', value = 'Genera in *com-del-comando* un messaggio per le Clan Battle.', inline = False)
-    embed.add_field(name = '`cb giorno orario1 orario2...`', value = 'Genera in *com-del-comando* un messaggio per le Clan Brawl.', inline = False)
-    embed.add_field(name = '`edit channelID messageID "messaggio"`', value = 'modifica un messaggio con *messaggio*.', inline = False)
-    embed.add_field(name = '`vote [message_ID]`', value = 'Aggiunge delle reazioni all\'ultimo messaggio inviato dall\'autore, oppure li aggiunge al messaggio avente l\'ID passato per parametro.', inline = False)
+    embed.colour = discord.Colour.from_rgb(152, 4, 11)
+    embed.description = 'Il prefisso da usare è: `>`\n `[]` indica un parametro opzionale. \n `{}` indica un parametro ripetibile.'
+    embed.set_image(url = 'https://i.pinimg.com/originals/c2/98/89/c29889bc3f9fa858ebbd82b5e26d0435.jpg')
+    embed.add_field(name = '`write channel_ID "message"`', value = 'Scrive il *message* nel canale con ID *channel_ID*', inline = False)
+    embed.add_field(name = '`edit channel_ID message_ID "messagge"`', value = 'Sostituisce il messaggio con ID *message_ID* col testo *messagge*.', inline = False)
+    embed.add_field(name = '`add_emoji message_ID [emoji]`', value = 'Aggiunge la reazione *emoji* al messaggio con ID *message_ID*.', inline = False)
+    embed.add_field(name = '`vote [message_ID]`', value = 'Aggiunge le reazioni per votare all\'ultimo messaggio inviato dall\'autore, o al messaggio con ID *message_ID*.', inline = False)
+    embed.add_field(name = '`CB day time {time}`', value = 'Genera in *com-del-comando* un messaggio per le Clan Battle.', inline = False)
+    embed.add_field(name = '`cb day time {time}`', value = 'Genera in *com-del-comando* un messaggio per le Clan Brawl.', inline = False)
     embed.add_field(name = '`dice`', value = 'Lancia un dado a 6 facce.', inline = False)
     embed.add_field(name = '`coin`', value = 'Lancia una moneta.', inline = False)
+    embed.set_footer(text = 'Per avere l\'ID di un messaggio o canale, bisogna attivare la modalità sviluppatore su Discord.' )
     await ctx.send(embed = embed)
 
 @bot.command()
@@ -76,7 +80,7 @@ async def edit(ctx, channel_id, message_id, new_message):
     await message.edit(content = new_message)
 
 @bot.command()
-async def add_reaction(ctx, message_id, emoji):
+async def add_emoji(ctx, message_id, emoji):
     guild = ctx.guild
     channel = ctx.message.channel
     message = await channel.fetch_message(int(message_id))
@@ -85,6 +89,7 @@ async def add_reaction(ctx, message_id, emoji):
 
 @bot.command()
 async def vote(ctx, *args):
+    await ctx.message.delete()
     if len(args) == 0:
         author = ctx.message.author
         channel = ctx.message.channel
@@ -93,7 +98,6 @@ async def vote(ctx, *args):
         message_id = args[0]
         channel = ctx.message.channel
         msg = await channel.fetch_message(int(message_id))
-    await ctx.message.delete()
     await msg.add_reaction('\U00002705')
     await msg.add_reaction('\U0000274C')
 
