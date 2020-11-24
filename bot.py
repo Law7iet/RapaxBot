@@ -21,7 +21,7 @@ async def help(ctx):
     embed = discord.Embed()
     embed.colour = discord.Colour.from_rgb(152, 4, 11)
     embed.description = 'Il prefisso da usare è: `>`\n `[]` indica un parametro opzionale. \n `{}` indica un parametro ripetibile.'
-    embed.set_author(name = 'RapaxBot', icon_url = 'https://cdn.discordapp.com/attachments/696853218642231346/780440538604109844/wowsITA.png')
+    embed.set_author(name = 'RapaxBot', icon_url = 'https://cdn.discordapp.com/attachments/711212263062765608/780906915231432744/LogoRapax.jpg')
     embed.add_field(name = '`write channel_ID "message"`', value = 'Scrive il *message* nel canale con ID *channel_ID*', inline = False)
     embed.add_field(name = '`edit channel_ID message_ID "messagge"`', value = 'Sostituisce il messaggio con ID *message_ID* col testo *messagge*.', inline = False)
     embed.add_field(name = '`add_emoji message_ID [emoji]`', value = 'Aggiunge la reazione *emoji* al messaggio con ID *message_ID*.', inline = False)
