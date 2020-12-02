@@ -2,6 +2,7 @@ from utils import *
 import moderator as mod
 import random
 import discord
+import asyncio
 
 #@bot.event
 #async def on_ready():
@@ -15,12 +16,13 @@ async def help(ctx):
     embed.colour = discord.Colour.from_rgb(152, 4, 11)
     embed.description = 'Il prefisso da usare è: `>`\n `[]` indica un parametro opzionale. \n `{}` indica un parametro ripetibile.'
     embed.set_author(name = 'RapaxBot', icon_url = 'https://cdn.discordapp.com/attachments/711212263062765608/781507702853074964/Rapax_circle.png')
+    embed.add_field(name = '`CB day time {time}`', value = 'Genera in *com-del-comando* un messaggio per le Clan Battle.', inline = False)
+    embed.add_field(name = '`cb day time {time}`', value = 'Genera in *com-del-comando* un messaggio per le Clan Brawl.', inline = False)
     embed.add_field(name = '`write channel_ID "message"`', value = 'Scrive il *message* nel canale con ID *channel_ID*', inline = False)
     embed.add_field(name = '`edit channel_ID message_ID "messagge"`', value = 'Sostituisce il messaggio con ID *message_ID* col testo *messagge*.', inline = False)
     embed.add_field(name = '`add_emoji message_ID [emoji]`', value = 'Aggiunge la reazione *emoji* al messaggio con ID *message_ID*.', inline = False)
     embed.add_field(name = '`vote [message_ID]`', value = 'Aggiunge le reazioni per votare all\'ultimo messaggio inviato dall\'autore, o al messaggio con ID *message_ID*.', inline = False)
-    embed.add_field(name = '`CB day time {time}`', value = 'Genera in *com-del-comando* un messaggio per le Clan Battle.', inline = False)
-    embed.add_field(name = '`cb day time {time}`', value = 'Genera in *com-del-comando* un messaggio per le Clan Brawl.', inline = False)
+    embed.add_field(name = '`ban @member timer "reason"`', value = 'Aggiunge il ruolo `Prigioniero` a ``@member` per `timer` secondi', inline = False)
     embed.add_field(name = '`dice`', value = 'Lancia un dado a 6 facce.', inline = False)
     embed.add_field(name = '`d20`', value = 'Lancia un dado a 20 facce.', inline = False)
     embed.add_field(name = '`coin`', value = 'Lancia una moneta.', inline = False)
@@ -136,6 +138,33 @@ async def coin(ctx):
     await ctx.send(random.choice(moneta))
 
 @bot.command()
+async def ban(ctx, member: discord.Member, time, message):
+    flag = mod.check_role(ctx)
+    if flag == True:
+        guild = ctx.guild
+        channel = guild.get_channel(int(783375373285982208))
+        role = guild.get_role(783375143593836595)
+        list_roles = member.roles
+        for i in range(1, len(list_roles)):
+            await member.remove_roles(list_roles[i])
+        await member.add_roles(role)
+        message = member.name + ' è stato messo in prigione per ' + time + ' secondi.\nMovitazione: ' + message
+        await channel.send(message)
+        timer = int(time)
+        while True:
+            timer -= 1
+            if timer == 0:
+                await channel.send('Fine quarantena.')
+                break
+            await asyncio.sleep(1)
+        for i in range(1, len(list_roles)):
+            await member.add_roles(list_roles[i])
+        await member.remove_roles(role)
+    else:
+        await ctx.message.delete()
+        await ctx.send('Non hai i permessi')
+
+@bot.command()
 async def randomize(ctx, message_id):
     guild = ctx.guild
     channel = guild.get_channel(int(comando_ID))
@@ -164,5 +193,11 @@ async def randomize(ctx, message_id):
     message = message + '.'
     if esclusi > 0:
         await ctx.send(message)
+
+@bot.command()
+async def ciao(ctx, member: discord.Member):
+    lista = member.roles
+    print(lista[0])
+    print(type(lista[0]))
 
 bot.run(TOKEN)
