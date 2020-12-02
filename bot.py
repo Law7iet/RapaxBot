@@ -1,20 +1,13 @@
+from utils import *
+import moderator as mod
 import random
 import discord
-from discord.ext import commands
 
-TOKEN = 'NzEwOTAzMTI0NzI2MTIwNTA4.Xr7ONw.H1O1R6aLaOWZaUNgfvqdt9ptBOk'
-
-bot = commands.Bot(command_prefix = '>')
-bot.remove_command('help')
-
-testingID = 711212263062765608
-comandoID = 680757461606727710
-
-@bot.event
-async def on_ready():
-    channel = bot.get_channel(testingID)
-    message = 'RapaxBot è pronto a salpare!'
-    await channel.send(message)
+#@bot.event
+#async def on_ready():
+#    channel = bot.get_channel(testing_ID)
+#    message = 'RapaxBot è pronto a salpare!'
+#    await channel.send(message)
 
 @bot.command()
 async def help(ctx):
@@ -29,80 +22,112 @@ async def help(ctx):
     embed.add_field(name = '`CB day time {time}`', value = 'Genera in *com-del-comando* un messaggio per le Clan Battle.', inline = False)
     embed.add_field(name = '`cb day time {time}`', value = 'Genera in *com-del-comando* un messaggio per le Clan Brawl.', inline = False)
     embed.add_field(name = '`dice`', value = 'Lancia un dado a 6 facce.', inline = False)
+    embed.add_field(name = '`d20`', value = 'Lancia un dado a 20 facce.', inline = False)
     embed.add_field(name = '`coin`', value = 'Lancia una moneta.', inline = False)
     embed.set_footer(text = 'Per avere l\'ID di un messaggio o canale, bisogna attivare la modalità sviluppatore su Discord.' )
     await ctx.send(embed = embed)
 
 @bot.command()
 async def CB(ctx, *args):
-    channel = bot.get_channel(comandoID)
-    day = args[0]
-    i = 1
-    message = '<@&680766615234543662> perfavore segnalateci la vostra disponibilità per le Clan Battle!'
-    await channel.send(message)
-    while i < len(args):
-            hour = args[i]
-            message = 'Presenze delle Clan Battle di ' + day + ', ore: ' + hour
-            msg = await channel.send(message)
-            await msg.add_reaction('\U00002705')
-            await msg.add_reaction('\U0000274C')
-            await msg.add_reaction('\U0000267B')
-            i = i + 1
+    flag = mod.check_role(ctx)
+    if flag == True:
+        channel = bot.get_channel(testing_ID)
+        i = 1
+        message = mod.clan_message(1)
+        await channel.send(message)
+        while i < len(args):
+                message = mod.clan_participation(1, args[0], args[i])
+                msg = await channel.send(message)
+                for element in votazioni_cb:
+                    await msg.add_reaction(element)
+                i = i + 1
+    else:
+        await ctx.message.delete()
+        await ctx.send('Non hai i permessi')
 
 @bot.command()
 async def cb(ctx, *args):
-    channel = bot.get_channel(comandoID)
-    day = args[0]
-    i = 1
-    message = '<@&680766615234543662> perfavore segnalateci la vostra disponibilità per le Clan Brawl!'
-    await channel.send(message)
-    while i < len(args):
-            hour = args[i]
-            message = 'Presenze delle Clan Brawl di ' + day + ', ore: ' + hour
-            msg = await channel.send(message)
-            await msg.add_reaction('\U00002705')
-            await msg.add_reaction('\U0000274C')
-            await msg.add_reaction('\U0000267B')
-            i = i + 1
+    flag = mod.check_role(ctx)
+    if flag == True:
+        channel = bot.get_channel(testing_ID)
+        i = 1
+        message = mod.clan_message(0)
+        await channel.send(message)
+        while i < len(args):
+                message = mod.clan_participation(0, args[0], args[i])
+                msg = await channel.send(message)
+                for element in votazioni_cb:
+                    await msg.add_reaction(element)
+                i = i + 1
+    else:
+        await ctx.message.delete()
+        await ctx.send('Non hai i permessi')
 
 @bot.command()
 async def write(ctx, channel_id, message):
-    guild = ctx.guild
-    channel = guild.get_channel(int(channel_id))
-    await channel.send(message)
+    flag = mod.check_role(ctx)
+    if flag == True:
+        guild = ctx.guild
+        channel = guild.get_channel(int(channel_id))
+        await channel.send(message)
+    else:
+        await ctx.message.delete()
+        await ctx.send('Non hai i permessi')
 
 @bot.command()
 async def edit(ctx, channel_id, message_id, new_message):
-    guild = ctx.guild
-    channel = guild.get_channel(int(channel_id))
-    message = await channel.fetch_message(int(message_id))
-    await message.edit(content = new_message)
+    flag = mod.check_role(ctx)
+    if flag == True:
+        guild = ctx.guild
+        channel = guild.get_channel(int(channel_id))
+        message = await channel.fetch_message(int(message_id))
+        await message.edit(content = new_message)
+    else:
+        await ctx.message.delete()
+        await ctx.send('Non hai i permessi')
 
 @bot.command()
 async def add_emoji(ctx, message_id, emoji):
-    guild = ctx.guild
-    channel = ctx.message.channel
-    message = await channel.fetch_message(int(message_id))
-    await ctx.message.delete()
-    await message.add_reaction(emoji)
+    flag = mod.check_role(ctx)
+    if flag == True:
+        guild = ctx.guild
+        channel = ctx.message.channel
+        await ctx.message.delete()
+        message = await channel.fetch_message(int(message_id))
+        await message.add_reaction(emoji)
+    else:
+        await ctx.message.delete()
+        await ctx.send('Non hai i permessi')
 
 @bot.command()
 async def vote(ctx, *args):
-    await ctx.message.delete()
     if len(args) == 0:
+        await ctx.message.delete()
         author = ctx.message.author
         channel = ctx.message.channel
         msg = await channel.history().get(author = author)
+        for element in votazioni:
+            await msg.add_reaction(element)
     else:
-        message_id = args[0]
-        channel = ctx.message.channel
-        msg = await channel.fetch_message(int(message_id))
-    await msg.add_reaction('\U00002705')
-    await msg.add_reaction('\U0000274C')
+        flag = mod.check_role(ctx)
+        if flag == True:
+            message_id = args[0]
+            channel = ctx.message.channel
+            msg = await channel.fetch_message(int(message_id))
+            for element in votazioni:
+                await msg.add_reaction(element)
+        else:
+            await ctx.message.delete()
+            await ctx.send('Non hai i permessi')
 
 @bot.command()
 async def dice(ctx):
     dado = [1, 2, 3, 4, 5, 6]
+    await ctx.send(random.choice(dado))
+
+@bot.command()
+async def d20(ctx):
+    dado = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     await ctx.send(random.choice(dado))
 
 @bot.command()
@@ -113,7 +138,7 @@ async def coin(ctx):
 @bot.command()
 async def randomize(ctx, message_id):
     guild = ctx.guild
-    channel = guild.get_channel(int(comandoID))
+    channel = guild.get_channel(int(comando_ID))
     message = await channel.fetch_message(int(message_id))
     emoji = discord.utils.get(ctx.guild.emojis, name = 'rapax')
     reaction = discord.utils.get(message.reactions, emoji = emoji)
