@@ -145,21 +145,25 @@ async def ban(ctx, member: discord.Member, time, message):
         channel = guild.get_channel(int(783375373285982208))
         role = guild.get_role(783375143593836595)
         list_roles = member.roles
-        for i in range(1, len(list_roles)):
-            await member.remove_roles(list_roles[i])
-        await member.add_roles(role)
-        message = member.name + ' è stato messo in prigione per ' + time + ' secondi.\nMovitazione: ' + message
-        await channel.send(message)
-        timer = int(time)
-        while True:
-            timer -= 1
-            if timer == 0:
-                await channel.send('Fine quarantena.')
-                break
-            await asyncio.sleep(1)
-        for i in range(1, len(list_roles)):
-            await member.add_roles(list_roles[i])
-        await member.remove_roles(role)
+        if role in list_roles:
+                await ctx.send('È già prigionero')
+                flag = False
+        if flag == True:
+            for i in range(1, len(list_roles)):
+                await member.remove_roles(list_roles[i])
+            await member.add_roles(role)
+            message = member.name + ' è stato messo in prigione per ' + time + ' secondi.\nMovitazione: ' + message
+            await channel.send(message)
+            timer = int(time)
+            while True:
+                timer -= 1
+                if timer == 0:
+                    await channel.send('Fine quarantena.')
+                    break
+                await asyncio.sleep(1)
+            for i in range(1, len(list_roles)):
+                await member.add_roles(list_roles[i])
+            await member.remove_roles(role)
     else:
         await ctx.message.delete()
         await ctx.send('Non hai i permessi')
