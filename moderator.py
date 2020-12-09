@@ -6,12 +6,9 @@ def check_role(ctx):
             return True
     return False
 
-def timeout(sec):
-    return null
-
 def clan_message(flag):
     type = 'Battle.\n' if flag else 'Brawl.\n'
-    message = '<@&680766615234543662a>\nSegnalateci la vostra disponibilità per le Clan ' + type + 'Legenda:\n'
+    message = '<@&680766615234543662>\nSegnalateci la vostra disponibilità per le Clan ' + type + 'Legenda:\n'
     for i in range(5):
         message = message + '- ' + votazioni_cb[i] + ' ' + significato_votazioni_cb[i] + '\n'
     return message

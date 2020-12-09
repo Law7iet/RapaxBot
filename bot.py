@@ -33,7 +33,7 @@ async def help(ctx):
 async def CB(ctx, *args):
     flag = mod.check_role(ctx)
     if flag == True:
-        channel = bot.get_channel(testing_ID)
+        channel = bot.get_channel(comando_ID)
         i = 1
         message = mod.clan_message(1)
         await channel.send(message)
@@ -51,7 +51,7 @@ async def CB(ctx, *args):
 async def cb(ctx, *args):
     flag = mod.check_role(ctx)
     if flag == True:
-        channel = bot.get_channel(testing_ID)
+        channel = bot.get_channel(comando_ID)
         i = 1
         message = mod.clan_message(0)
         await channel.send(message)
@@ -113,6 +113,7 @@ async def vote(ctx, *args):
     else:
         flag = mod.check_role(ctx)
         if flag == True:
+            await ctx.message.delete()
             message_id = args[0]
             channel = ctx.message.channel
             msg = await channel.fetch_message(int(message_id))
@@ -197,11 +198,5 @@ async def randomize(ctx, message_id):
     message = message + '.'
     if esclusi > 0:
         await ctx.send(message)
-
-@bot.command()
-async def ciao(ctx, member: discord.Member):
-    lista = member.roles
-    print(lista[0])
-    print(type(lista[0]))
 
 bot.run(TOKEN)

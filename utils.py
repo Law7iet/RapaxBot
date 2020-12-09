@@ -1,7 +1,9 @@
 from discord.ext import commands
 
 # Bot
-bot = commands.Bot(command_prefix = '>')
+intents = discord.Intents.default()
+intents.members = True
+bot = commands.Bot(command_prefix = '>', intents = intents)
 bot.remove_command('help')
 
 # Secret token
