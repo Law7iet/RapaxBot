@@ -1,5 +1,5 @@
 from utils import *
-import moderator as mod
+from random import randrange
 import random
 import discord
 import asyncio
@@ -22,23 +22,23 @@ async def help(ctx):
     embed.add_field(name = '`edit channel_ID message_ID "messagge"`', value = 'Sostituisce il messaggio con ID *message_ID* col testo *messagge*.', inline = False)
     embed.add_field(name = '`add_emoji message_ID [emoji]`', value = 'Aggiunge la reazione *emoji* al messaggio con ID *message_ID*.', inline = False)
     embed.add_field(name = '`vote [message_ID]`', value = 'Aggiunge le reazioni per votare all\'ultimo messaggio inviato dall\'autore, o al messaggio con ID *message_ID*.', inline = False)
-    embed.add_field(name = '`ban @member timer "reason"`', value = 'Aggiunge il ruolo `Prigioniero` a ``@member` per `timer` secondi', inline = False)
-    embed.add_field(name = '`dice`', value = 'Lancia un dado a 6 facce.', inline = False)
-    embed.add_field(name = '`d20`', value = 'Lancia un dado a 20 facce.', inline = False)
+    embed.add_field(name = '`ban @member timer "reason"`', value = 'Aggiunge il ruolo `Prigioniero` a ``@member` per `timer` secondi.', inline = False)
+    embed.add_field(name = '`torp @member`', value = 'Aggiunge il ruolo `Torpamici` a ``@member` per un giorno.', inline = False)
+    embed.add_field(name = '`dice number`', value = 'Lancia un dado a `number` facce.', inline = False)
     embed.add_field(name = '`coin`', value = 'Lancia una moneta.', inline = False)
     embed.set_footer(text = 'Per avere l\'ID di un messaggio o canale, bisogna attivare la modalità sviluppatore su Discord.' )
     await ctx.send(embed = embed)
 
 @bot.command()
 async def CB(ctx, *args):
-    flag = mod.check_role(ctx)
+    flag = check_role(ctx)
     if flag == True:
         channel = bot.get_channel(comando_ID)
         i = 1
-        message = mod.clan_message(1)
+        message = clan_message(1)
         await channel.send(message)
         while i < len(args):
-                message = mod.clan_participation(1, args[0], args[i])
+                message = clan_participation(1, args[0], args[i])
                 msg = await channel.send(message)
                 for element in votazioni_cb:
                     await msg.add_reaction(element)
@@ -49,14 +49,14 @@ async def CB(ctx, *args):
 
 @bot.command()
 async def cb(ctx, *args):
-    flag = mod.check_role(ctx)
+    flag = check_role(ctx)
     if flag == True:
         channel = bot.get_channel(comando_ID)
         i = 1
-        message = mod.clan_message(0)
+        message = clan_message(0)
         await channel.send(message)
         while i < len(args):
-                message = mod.clan_participation(0, args[0], args[i])
+                message = clan_participation(0, args[0], args[i])
                 msg = await channel.send(message)
                 for element in votazioni_cb:
                     await msg.add_reaction(element)
@@ -67,7 +67,7 @@ async def cb(ctx, *args):
 
 @bot.command()
 async def write(ctx, channel_id, message):
-    flag = mod.check_role(ctx)
+    flag = check_role(ctx)
     if flag == True:
         guild = ctx.guild
         channel = guild.get_channel(int(channel_id))
@@ -78,7 +78,7 @@ async def write(ctx, channel_id, message):
 
 @bot.command()
 async def edit(ctx, channel_id, message_id, new_message):
-    flag = mod.check_role(ctx)
+    flag = check_role(ctx)
     if flag == True:
         guild = ctx.guild
         channel = guild.get_channel(int(channel_id))
@@ -90,9 +90,8 @@ async def edit(ctx, channel_id, message_id, new_message):
 
 @bot.command()
 async def add_emoji(ctx, message_id, emoji):
-    flag = mod.check_role(ctx)
+    flag = check_role(ctx)
     if flag == True:
-        guild = ctx.guild
         channel = ctx.message.channel
         await ctx.message.delete()
         message = await channel.fetch_message(int(message_id))
@@ -111,7 +110,7 @@ async def vote(ctx, *args):
         for element in votazioni:
             await msg.add_reaction(element)
     else:
-        flag = mod.check_role(ctx)
+        flag = check_role(ctx)
         if flag == True:
             await ctx.message.delete()
             message_id = args[0]
@@ -124,14 +123,9 @@ async def vote(ctx, *args):
             await ctx.send('Non hai i permessi')
 
 @bot.command()
-async def dice(ctx):
-    dado = [1, 2, 3, 4, 5, 6]
-    await ctx.send(random.choice(dado))
-
-@bot.command()
-async def d20(ctx):
-    dado = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-    await ctx.send(random.choice(dado))
+async def dice(ctx, number):
+    number = int(number)
+    await ctx.send(randrange(number) + 1)
 
 @bot.command()
 async def coin(ctx):
@@ -140,12 +134,14 @@ async def coin(ctx):
 
 @bot.command()
 async def ban(ctx, member: discord.Member, time, message):
-    flag = mod.check_role(ctx)
+    flag = check_role(ctx)
     if flag == True:
         guild = ctx.guild
-        channel = guild.get_channel(int(783375373285982208))
-        role = guild.get_role(783375143593836595)
+        channel = guild.get_channel(prigione_ID)
+        role = guild.get_role(amministratore_ID)
         list_roles = member.roles
+        list_roles.remove(role)
+        role = guild.get_role(prigioniero_ID)
         if role in list_roles:
                 await ctx.send('È già prigionero')
                 flag = False
@@ -159,11 +155,38 @@ async def ban(ctx, member: discord.Member, time, message):
             while True:
                 timer -= 1
                 if timer == 0:
-                    await channel.send('Fine quarantena.')
+                    await channel.send(member.name + ' ha scontato la propria pena. Fine della quarantena.')
                     break
                 await asyncio.sleep(1)
             for i in range(1, len(list_roles)):
                 await member.add_roles(list_roles[i])
+            await member.remove_roles(role)
+    else:
+        await ctx.message.delete()
+        await ctx.send('Non hai i permessi')
+
+@bot.command()
+async def torp(ctx, member: discord.Member):
+    flag = check_role(ctx)
+    if flag == True:
+        guild = ctx.guild
+        channel = guild.get_channel(prigione_ID)
+        role = guild.get_role(torpamici_ID)
+        list_roles = member.roles
+        if role in list_roles:
+                await ctx.send('È già un torpamico')
+                flag = False
+        if flag == True:
+            await member.add_roles(role)
+            message = member.name + ' è diventato un torpamico per un giorno.'
+            await channel.send(message)
+            timer = int(86400)
+            while True:
+                timer -= 1
+                if timer == 0:
+                    await channel.send(member.name + ' non è più torpamico.')
+                    break
+                await asyncio.sleep(1)
             await member.remove_roles(role)
     else:
         await ctx.message.delete()
