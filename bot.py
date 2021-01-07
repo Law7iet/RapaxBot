@@ -140,7 +140,8 @@ async def ban(ctx, member: discord.Member, time, message):
         channel = guild.get_channel(prigione_ID)
         role = guild.get_role(amministratore_ID)
         list_roles = member.roles
-        list_roles.remove(role)
+        if role in list_roles:
+            list_roles.remove(role)
         role = guild.get_role(prigioniero_ID)
         if role in list_roles:
                 await ctx.send('È già prigionero')
