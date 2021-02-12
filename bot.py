@@ -3,6 +3,8 @@ import moderator as mod
 import random
 import discord
 import asyncio
+import re
+import nickname as nick
 
 #@bot.event
 #async def on_ready():
@@ -168,6 +170,52 @@ async def ban(ctx, member: discord.Member, time, message):
     else:
         await ctx.message.delete()
         await ctx.send('Non hai i permessi')
+
+@bot.command()
+async def nickname(ctx):
+    flag = mod.check_role(ctx)
+    if flag == True:
+        # get all the server's members
+        guild = ctx.guild
+        members = guild.members
+        for member in members:
+            # select only guest
+            if guild.get_role(680776924859334672) in member.roles:
+                # select their nickname or their name if they don't have a nickname
+                if member.nick != None:
+                    user = member.nick
+                else:
+                    user = member.name
+                # delete clan tag and their real name
+                user = re.sub(r'\[.+\]', '', user)
+                user = user.lstrip()
+                name = re.search(r"\(([A-Za-z0-9_]+)\)", user)
+                if name != None:
+                    user = re.sub(r'\(.+\)', '', user)
+                    name = name.group(1)
+                # get user's nickname and his's clan tag using WoWs API
+                player_info = nick.get_player_ID(user)
+                try:
+                    game_nick = player_info[0]
+                    player_id = player_info[1]
+                    clan_id = nick.get_clan_ID(player_id)
+                    # select user's nickname
+                    new_nick = game_nick
+                    if clan_id != -1:
+                        # add his clan's tag
+                        clan_tag = nick.get_clan_name(clan_id)
+                        new_nick = '[' + clan_tag + '] ' + game_nick
+                    if name != None and len(new_nick + ' (' + name + ')') <= 32:
+                        # add his name
+                        new_nick = new_nick + ' (' + name + ')'
+                    # change nickname
+                    await member.edit(nick=new_nick)
+                except:
+                    print('Il membro ' + user + ' non è stato trovato.')
+    else:
+        await ctx.message.delete()
+        await ctx.send('Non hai i permessi')
+
 
 @bot.command()
 async def randomize(ctx, message_id):
