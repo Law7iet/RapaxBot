@@ -1,5 +1,2 @@
 discord.py
 requests
-random
-asyncio
-re
