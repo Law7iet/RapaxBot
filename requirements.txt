@@ -1,6 +1,5 @@
 discord.py
 requests
-json
 random
 asyncio
 re
