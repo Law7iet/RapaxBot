@@ -2,16 +2,25 @@ from utils import *
 from random import randrange
 import random
 import discord
+from discord.ext import commands
 import asyncio
 import re
-import nickname as nick
+import config
 
-#@bot.event
-#async def on_ready():
-#    channel = bot.get_channel(testing_ID)
-#    message = 'RapaxBot è pronto a salpare!'
-#    await channel.send(message)
+# Bot's setup
+intents = discord.Intents.default()
+intents.members = True
+bot = commands.Bot(command_prefix = config.data["PREFIX"], intents = intents)
+bot.remove_command('help')
 
+# Bot's events
+@bot.event
+async def on_ready():
+    channel = bot.get_channel(TESTING)
+    message = 'RapaxBot è pronto a salpare!'
+    await channel.send(message)
+
+# Bot's commands
 @bot.command()
 async def help(ctx):
     embed = discord.Embed()
@@ -36,7 +45,7 @@ async def help(ctx):
 async def CB(ctx, *args):
     flag = check_role(ctx)
     if flag == True:
-        channel = bot.get_channel(comando_ID)
+        channel = bot.get_channel(COM_DEL_COMANDO)
         i = 1
         message = clan_message(1)
         await channel.send(message)
@@ -54,7 +63,7 @@ async def CB(ctx, *args):
 async def cb(ctx, *args):
     flag = check_role(ctx)
     if flag == True:
-        channel = bot.get_channel(comando_ID)
+        channel = bot.get_channel(COM_DEL_COMANDO)
         i = 1
         message = clan_message(0)
         await channel.send(message)
@@ -91,6 +100,7 @@ async def edit(ctx, channel_id, message_id, new_message):
         await ctx.message.delete()
         await ctx.send('Non hai i permessi')
 
+# It works only for deafult's emoji and server's emoji
 @bot.command()
 async def add_emoji(ctx, message_id, emoji):
     flag = check_role(ctx)
@@ -140,12 +150,12 @@ async def ban(ctx, member: discord.Member, time, message):
     flag = check_role(ctx)
     if flag == True:
         guild = ctx.guild
-        channel = guild.get_channel(prigione_ID)
-        role = guild.get_role(amministratore_ID)
+        channel = guild.get_channel(PRIGIONE)
+        role = guild.get_role(AMMINISTRATORE)
         list_roles = member.roles
         if role in list_roles:
             list_roles.remove(role)
-        role = guild.get_role(prigioniero_ID)
+        role = guild.get_role(PRIGIONIERO)
         if role in list_roles:
                 await ctx.send('È già prigionero')
                 flag = False
@@ -169,12 +179,13 @@ async def ban(ctx, member: discord.Member, time, message):
         await ctx.message.delete()
         await ctx.send('Non hai i permessi')
 
+@bot.command()
 async def torp(ctx, member: discord.Member):
     flag = check_role(ctx)
     if flag == True:
         guild = ctx.guild
-        channel = guild.get_channel(prigione_ID)
-        role = guild.get_role(torpamici_ID)
+        channel = guild.get_channel(PRIGIONE)
+        role = guild.get_role(TORPAMICI)
         list_roles = member.roles
         if role in list_roles:
                 await ctx.send('È già un torpamico')
@@ -192,7 +203,7 @@ async def torp(ctx, member: discord.Member):
 
 @bot.command()
 async def nickname(ctx):
-    flag = mod.check_role(ctx)
+    flag = check_role(ctx)
     if flag == True:
         # get all the server's members
         guild = ctx.guild
@@ -213,16 +224,16 @@ async def nickname(ctx):
                     user = re.sub(r'\(.+\)', '', user)
                     name = name.group(1)
                 # get user's nickname and his's clan tag using WoWs API
-                player_info = nick.get_player_ID(user)
+                player_info = get_player_ID(user)
                 try:
                     game_nick = player_info[0]
                     player_id = player_info[1]
-                    clan_id = nick.get_clan_ID(player_id)
+                    clan_id = get_clan_ID(player_id)
                     # select user's nickname
                     new_nick = game_nick
                     if clan_id != -1:
                         # add his clan's tag
-                        clan_tag = nick.get_clan_name(clan_id)
+                        clan_tag = get_clan_name(clan_id)
                         new_nick = '[' + clan_tag + '] ' + game_nick
                     if name != None and len(new_nick + ' (' + name + ')') <= 32:
                         # add his name
@@ -230,36 +241,7 @@ async def nickname(ctx):
                     # change nickname
                     await member.edit(nick=new_nick)
                 except:
-                    print('Il membro ' + user + ' non è stato trovato.')
+                    await ctx.send('Il membro ' + user + ' non è stato trovato.')
 
-@bot.command()
-async def randomize(ctx, message_id):
-    guild = ctx.guild
-    channel = guild.get_channel(int(comando_ID))
-    message = await channel.fetch_message(int(message_id))
-    emoji = discord.utils.get(ctx.guild.emojis, name = 'rapax')
-    reaction = discord.utils.get(message.reactions, emoji = emoji)
-    users = await reaction.users().flatten()
-    partecipanti = len(users)
-    squadre = int(partecipanti / 3)
-    esclusi = partecipanti % 3
-    message = 'Ci sono {} partecipanti. Le squadre sono composte da 3 giocatori, quindi ci saranno: \n - {} squadre; \n - {} partecipanti verranno esclusi.'.format(partecipanti, squadre, esclusi)
-    await ctx.send(message)
-    while len(users) >= 3:
-        user1 = random.choice(users)
-        users.remove(user1)
-        user2 = random.choice(users)
-        users.remove(user2)
-        user3 = random.choice(users)
-        users.remove(user3)
-        await ctx.send('Team: ' + user1.nick + ', ' + user2.nick + ', ' + user3.nick + '.')
-    message = 'Gli esclusi sono: '
-    while users:
-        user = random.choice(users)
-        users.remove(user)
-        message = message + '\n - ' + user.nick
-    message = message + '.'
-    if esclusi > 0:
-        await ctx.send(message)
-
-bot.run(TOKEN)
+# Run bot
+bot.run(config.data["TOKEN"])
