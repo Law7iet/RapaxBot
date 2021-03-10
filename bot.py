@@ -14,11 +14,11 @@ bot = commands.Bot(command_prefix = config.data['PREFIX'], intents = intents)
 bot.remove_command('help')
 
 # Bot's events
-@bot.event
-async def on_ready():
-    channel = bot.get_channel(TESTING)
-    message = 'RapaxBot è pronto a salpare!'
-    await channel.send(message)
+#@bot.event
+#async def on_ready():
+#    channel = bot.get_channel(TESTING)
+#    message = 'RapaxBot è pronto a salpare!'
+#    await channel.send(message)
 
 # Bot's commands
 @bot.command()
