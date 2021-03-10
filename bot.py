@@ -1,16 +1,16 @@
-from utils import *
 from random import randrange
 import random
 import discord
 from discord.ext import commands
 import asyncio
-import re
 import config
+import re
+from utils import *
 
 # Bot's setup
 intents = discord.Intents.default()
 intents.members = True
-bot = commands.Bot(command_prefix = config.data["PREFIX"], intents = intents)
+bot = commands.Bot(command_prefix = config.data['PREFIX'], intents = intents)
 bot.remove_command('help')
 
 # Bot's events
@@ -219,7 +219,7 @@ async def nickname(ctx):
                 # delete clan tag and their real name
                 user = re.sub(r'\[.+\]', '', user)
                 user = user.lstrip()
-                name = re.search(r"\(([A-Za-z0-9_]+)\)", user)
+                name = re.search(r'\(([A-Za-z0-9_]+)\)', user)
                 if name != None:
                     user = re.sub(r'\(.+\)', '', user)
                     name = name.group(1)
@@ -244,4 +244,4 @@ async def nickname(ctx):
                     await ctx.send('Il membro ' + user + ' non è stato trovato.')
 
 # Run bot
-bot.run(config.data["TOKEN"])
+bot.run(config.data['TOKEN'])

@@ -1,5 +1,6 @@
 import requests
 import json
+import config
 
 # Costants
 
@@ -24,9 +25,9 @@ votazioni_cb = ('\U00002705', '\U0000274C', '\U00002753', '\U0000267B', '\U0001f
 significato_votazioni_cb = ('Si', 'No', 'Non lo so', 'Riserva', 'Arrivo tardi')
 
 # WoWs API
-URL_PLAYER_ID = 'https://api.worldofwarships.eu/wows/account/list/?application_id=9ce03c66a05fe16e0760cf5f4e11c02e&search='
-URL_PLAYER_CLAN_ID = 'https://api.worldofwarships.eu/wows/clans/accountinfo/?application_id=9ce03c66a05fe16e0760cf5f4e11c02e&account_id='
-URL_CLAN_NAME = 'https://api.worldofwarships.eu/wows/clans/info/?application_id=9ce03c66a05fe16e0760cf5f4e11c02e&clan_id='
+URL_PLAYER_ID = 'https://api.worldofwarships.eu/wows/account/list/?application_id=' + config.data['API'] + '&search='
+URL_PLAYER_CLAN_ID = 'https://api.worldofwarships.eu/wows/clans/accountinfo/?application_id=' + config.data['API'] + '&account_id='
+URL_CLAN_NAME = 'https://api.worldofwarships.eu/wows/clans/info/?application_id=' + config.data['API'] + '&clan_id='
 
 # Support fuctions
 
