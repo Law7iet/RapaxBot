@@ -1,6 +1,3 @@
-import requests
-import json
-import config
 
 # Costants
 
@@ -17,6 +14,7 @@ RECLUTATORE = 680766568531361792
 MEMBRO_DEL_CLAN = 680766615234543662
 PRIGIONIERO = 783375143593836595
 TORPAMICI = 696828138591879189
+OSPITI = 680776924859334672
 
 # Tuple of reactions
 votazioni = ('\U00002705', '\U0000274C', '\U00002753')
@@ -69,13 +67,13 @@ def get_player_ID(nickname):
     URL = URL_PLAYER_ID + nickname
     # check data errors
     data = check_data(URL)
-    if data['meta']['count'] == 0:
-        return -1
-    else:
+    try:
         data = data['data']
         data.reverse()
         data = data.pop()
         return [data['nickname'], data['account_id']]
+    except:
+        return -1
 
 # Get the player's clan's ID from his ID
 def get_clan_ID(ID):

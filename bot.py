@@ -210,7 +210,7 @@ async def nickname(ctx):
         members = guild.members
         for member in members:
             # select only guest
-            if guild.get_role(680776924859334672) in member.roles:
+            if guild.get_role(OSPITI) in member.roles:
                 # select their nickname or their name if they don't have a nickname
                 if member.nick != None:
                     user = member.nick
@@ -241,7 +241,7 @@ async def nickname(ctx):
                     # change nickname
                     await member.edit(nick=new_nick)
                 except:
-                    await ctx.send('Il membro ' + user + ' non è stato trovato.')
+                    await ctx.send('Il membro `' + user + '` non è stato trovato.')
 
 # Run bot
 bot.run(config.data['TOKEN'])
