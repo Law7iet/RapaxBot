@@ -1,4 +1,5 @@
 import config
+import requests
 
 # Costants
 
