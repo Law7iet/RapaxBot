@@ -2,13 +2,13 @@ import config
 
 # Costants
 
-# Channels" ID
+# Channels' ID
 TESTING = 711212263062765608
 COM_DEL_COMANDO = 680757461606727710
 PRIGIONE_TESTUALE = 783375373285982208
 PRIGIONE_VOCALE = 836152721781293067
 
-# Roles" ID
+# Roles' ID
 AMMINISTRATORE = 680772355940679689
 COMANDANTE = 680766448553295919
 UFFICIALE_ESECUTIVO = 680766526953095179
@@ -63,7 +63,7 @@ def check_data(URL):
     else:
         return data
 
-# Get the player"s ID from his nickname
+# Get the player's ID from his nickname
 def get_player_ID(nickname):
     # get player ID
     URL = URL_PLAYER_ID + nickname
@@ -77,7 +77,7 @@ def get_player_ID(nickname):
     except:
         return -1
 
-# Get the player"s clan"s ID from his ID
+# Get the player's clan's ID from his ID
 def get_clan_ID(ID):
     # get clan ID
     URL = URL_PLAYER_CLAN_ID + str(ID)
@@ -89,7 +89,7 @@ def get_clan_ID(ID):
     else:
         return data[str(ID)]["clan_id"]
 
-# Get the clan"s name form its ID
+# Get the clan's name form its ID
 def get_clan_name(ID):
     # get clan name
     URL = URL_CLAN_NAME + str(ID)

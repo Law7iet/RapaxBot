@@ -7,20 +7,20 @@ import config
 import re
 from utils import *
 
-# Bot"s setup
+# Bot's setup
 intents = discord.Intents.default()
 intents.members = True
 bot = commands.Bot(command_prefix = config.data["PREFIX"], intents = intents)
 bot.remove_command("help")
 
-# Bot"s events
+# Bot's events
 #@bot.event
 #async def on_ready():
 #    channel = bot.get_channel(TESTING)
 #    message = "RapaxBot è pronto a salpare!"
 #    await channel.send(message)
 
-# Bot"s commands
+# Bot's commands
 @bot.command()
 async def help(ctx):
     embed = discord.Embed()
@@ -106,7 +106,7 @@ async def edit(ctx, channel_id, message_id, *new_message):
         await ctx.message.delete()
         await ctx.send("Non hai i permessi")
 
-# It works only for deafult"s emoji and server"s emoji
+# It works only for deafult"s emoji and server's emoji
 @bot.command()
 async def add_emoji(ctx, message_id, emoji):
     flag = check_role(ctx)
@@ -223,40 +223,31 @@ async def torp(ctx, member: discord.Member):
 async def nickname(ctx):
     flag = check_role(ctx)
     if flag == True:
-        # get all the server"s members
         guild = ctx.guild
         members = guild.members
         for member in members:
-            # select only guest
             if guild.get_role(OSPITI) in member.roles:
-                # select their nickname or their name if they don"t have a nickname
                 if member.nick != None:
                     user = member.nick
                 else:
                     user = member.name
-                # delete clan tag and their real name
                 user = re.sub(r"\[.+\]", "", user)
                 user = user.lstrip()
                 name = re.search(r"\(([A-Za-z0-9_]+)\)", user)
                 if name != None:
                     user = re.sub(r"\(.+\)", "", user)
                     name = name.group(1)
-                # get user"s nickname and his"s clan tag using WoWs API
                 player_info = get_player_ID(user)
                 try:
                     game_nick = player_info[0]
                     player_id = player_info[1]
                     clan_id = get_clan_ID(player_id)
-                    # select user"s nickname
                     new_nick = game_nick
                     if clan_id != -1:
-                        # add his clan"s tag
                         clan_tag = get_clan_name(clan_id)
                         new_nick = "[" + clan_tag + "] " + game_nick
                     if name != None and len(new_nick + " (" + name + ")") <= 32:
-                        # add his name
                         new_nick = new_nick + " (" + name + ")"
-                    # change nickname
                     await member.edit(nick=new_nick)
                 except:
                     await ctx.send("Il membro `" + user + "` non è stato trovato.")
