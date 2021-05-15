@@ -171,9 +171,12 @@ async def prison(ctx, member: discord.Member, time, *message):
                 for i in range(1, len(list_roles)):
                     await member.remove_roles(list_roles[i])
                 await member.add_roles(role)
-                if member.voice.channel != None:
+                try:
+                    member.voice.channel != None
                     channel_voice = member.voice.channel
                     await member.move_to(channel_voice_prison)
+                except:
+                    pass
                 text = ""
                 for word in message:
                     text = text + " " + word
