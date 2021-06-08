@@ -41,7 +41,7 @@ class Mod(commands.Cog):
     async def presenze(self, ctx, type, args):
         if not(await self.check_role(ctx)):
             return None
-        channel = self.bot.get_channel(TESTING)
+        channel = self.bot.get_channel(COM_DEL_COMANDO)
         i = 1
         message = self.clan_message(type)
         await channel.send(message)
