@@ -8,8 +8,8 @@ class Mod(commands.Cog):
     
     votazioni = ("\U00002705", "\U0000274C", "\U00002753")
     significato_votazioni = ("Si", "No", "Non lo so")
-    votazioni_cb = ("\U00002705", "\U0000274C", "\U00002753", "\U0000267B", "\U0001f559")
-    significato_votazioni_cb = ("Si", "No", "Non lo so", "Riserva", "Arrivo tardi")
+    votazioni_cb = ("\U00002705", "\U0000274C", "\U00002753", "\U0001f559")
+    significato_votazioni_cb = ("Si", "No", "Non lo so", "Arrivo tardi")
 
     def __init__(self, bot):
         self.bot = bot
@@ -23,42 +23,36 @@ class Mod(commands.Cog):
         await ctx.send(ctx.message.author.display_name + " non hai i permessi")
         return False
 
-    # Setup the messagge for the clan battle/brawl notification
-    def clan_message(self, flag):
-        type = "Battle.\n" if flag else "Brawl.\n"
-        message = "<@&680766615234543662>\nSegnalateci la vostra disponibilità per le Clan " + type + "Legenda:\n"
-        for i in range(5):
-            message = message + "- " + self.votazioni_cb[i] + " " + self.significato_votazioni_cb[i] + "\n"
-        return message
-
-    # Setup the message for the clan battle/brawl partecipation
-    def clan_participation(self, flag, day, hour):
-        type = "Battle" if flag else "Brawl"
-        message = "Presenze delle Clan " + type + " di " + day + ", ore: " + hour
-        return message
-
     # Generate the partecipation message for Clan Battles or Clan Brawl
-    async def presenze(self, ctx, type, args):
+    async def presenze(self, ctx, type, input):
         if not(await self.check_role(ctx)):
             return None
         channel = self.bot.get_channel(COM_DEL_COMANDO)
-        i = 1
-        message = self.clan_message(type)
+        channel = self.bot.get_channel(TESTING)
+        message = "<@&" + str(OSPITI) + ">"
         await channel.send(message)
-        while i < len(args):
-                message = self.clan_participation(1, args[0], args[i])
-                msg = await channel.send(message)
-                for element in self.votazioni_cb:
-                    await msg.add_reaction(element)
-                i = i + 1
+
+        day = input.pop(0).lstrip()
+        print(input)
+        for hour in input:
+            embed = discord.Embed()
+            embed.title = type
+            embed.description = "Ore " + hour.lstrip()
+            embed.colour = discord.Colour.from_rgb(152, 4, 11)
+            embed.set_author(name = day, icon_url = "https://cdn.discordapp.com/attachments/711212263062765608/781507702853074964/Rapax_circle.png")
+            embed.add_field(name = "Presente :white_check_mark:", value = "Nessuno", inline = True)
+            embed.add_field(name = "Assente :x:", value = "Nessuno", inline = True)
+            embed.add_field(name = "Forse :question:", value="Nessuno", inline = True)
+            embed.add_field(name = "Ritardo :clock830:", value = "Nessuno", inline = True)
+            msg = await ctx.send(embed = embed)
+            for element in self.votazioni_cb:
+                await msg.add_reaction(element)
 
     @commands.command()
-    async def CB(self, ctx, *args):
-        await self.presenze(ctx, 1, args)
-
-    @commands.command()
-    async def cb(self, ctx, *args):
-        await self.presenze(ctx, 0, args)
+    async def event(self, ctx, *args):
+        input = " ".join(args).split(",")
+        activity = input.pop(0)
+        await self.presenze(ctx, activity, input)
 
     @commands.command()
     async def write(self, ctx, channel_id, *message):
@@ -203,6 +197,12 @@ class Mod(commands.Cog):
             await asyncio.sleep(3600)
             await channel.send(member.name + " non è più torpamico.")
             await member.remove_roles(role)
+
+    @commands.Cog.listener()
+    async def on_reaction_add(self, reaction, user):
+        nickname = user.display_name
+        print("ciao")
+#        reaction.message.embed[0].
 
 def setup(bot):
     bot.add_cog(Mod(bot))
