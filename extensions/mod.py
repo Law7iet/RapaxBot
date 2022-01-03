@@ -39,21 +39,20 @@ class Mod(commands.Cog):
         await channel.send(message)
 
         # DAYLY EMBED
-        embed=discord.Embed(title="Presenze Clan Battle", description=day + "\n\n" + "\n".join(self.fields), color=0xffd519)
-        embed.set_author(name="RapaxBot")
-        embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/675275973918195712/924566156407341076/Logo_RAPAX_Cerchio.png")
-
-        # WEEKLY EMBED
-        # embed=discord.Embed(title="Presenze Clan Battle", description="Settimana dal 20/12 al 26/12", color=0xffd519)
+        # embed=discord.Embed(title="Presenze " + type, description=day + "\n\n" + "\n".join(self.fields), color=0xffd519)
         # embed.set_author(name="RapaxBot")
         # embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/675275973918195712/924566156407341076/Logo_RAPAX_Cerchio.png")
-        # embed.add_field(name="Mercoledì", value=":one: 19:00-20:30 \n :two: 21:00-23:00 ", inline=False)
-        # embed.add_field(name="Giovedì", value=":three: 19:00-20:30 \n :four: 21:00-23:00 ", inline=False)
-        # embed.add_field(name="Sabato", value=":five: 19:00-20:30 \n :six: 21:00-23:00 ", inline=False)
-        # embed.add_field(name="Domenica", value=":seven: 19:00-20:30 \n :eight: 21:00-23:00 ", inline=False)
-        # await ctx.send(embed=embed)
 
-        msg = await ctx.send(embed = embed)
+        # WEEKLY EMBED
+        embed=discord.Embed(title="Presenze " + type, description=day, color=0xffd519)
+        embed.set_author(name="RapaxBot")
+        embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/675275973918195712/924566156407341076/Logo_RAPAX_Cerchio.png")
+        embed.add_field(name="Mercoledì", value=":one: 19:00-20:30 \n :two: 21:00-23:00 ", inline=False)
+        embed.add_field(name="Giovedì", value=":three: 19:00-20:30 \n :four: 21:00-23:00 ", inline=False)
+        embed.add_field(name="Sabato", value=":five: 19:00-20:30 \n :six: 21:00-23:00 ", inline=False)
+        embed.add_field(name="Domenica", value=":seven: 19:00-20:30 \n :eight: 21:00-23:00 ", inline=False)
+
+        msg = await channel.send(embed = embed)
         for element in self.votazioni_cb:
             await msg.add_reaction(element)
 

@@ -21,6 +21,12 @@ OSPITI = 680776924859334672
 URL_PLAYER_ID = "https://api.worldofwarships.eu/wows/account/list/?application_id=" + config.data["API"] + "&search="
 URL_PLAYER_CLAN_ID = "https://api.worldofwarships.eu/wows/clans/accountinfo/?application_id=" + config.data["API"] + "&account_id="
 URL_CLAN_NAME = "https://api.worldofwarships.eu/wows/clans/info/?application_id=" + config.data["API"] + "&clan_id="
+URL_PLAYER_SHIPS = "https://api.worldofwarships.eu/wows/ships/stats/?application_id=" + config.data["API"] + "&fields=ship_id&account_id="
+URL_SHIPS = "https://api.worldofwarships.eu/wows/encyclopedia/ships/?application_id=" + config.data["API"] + "&fields=name%2C+tier%2C+is_special%2C+is_premium%2C+type%2C+nation&page_no="
+URL_PLAYER_NICKNAME = "https://api.worldofwarships.eu/wows/account/info/?application_id=" + config.data["API"] + "&fields=nickname&account_id="
+
+# RAPAX clan's ID
+RAPAX_ID = 500183314
 
 # Support fuctions
 
