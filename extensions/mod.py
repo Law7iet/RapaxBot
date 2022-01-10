@@ -9,8 +9,28 @@ from utils import *
 
 class Mod(commands.Cog):
     
-    votazioni = ("\U00002705", "\U0000274C", "\U00002753")
-    votazioni_cb = ("\U00000031\U000020E3", "\U00000032\U000020E3", "\U0001F557", "\U0000274C", "\U00002753")
+    votazioni = (
+        "\U00002705", 
+        "\U0000274C", 
+        "\U00002753"
+    )
+    votazioni_cb = (
+        "\U00000031\U000020E3",
+        "\U00000032\U000020E3",
+        "\U0001F557", 
+        "\U0000274C",
+        "\U00002753"
+    )
+    votazioni_CB = (
+        "\U00000031\U000020E3",
+        "\U00000032\U000020E3",
+        "\U00000033\U000020E3",
+        "\U00000034\U000020E3",
+        "\U00000035\U000020E3",
+        "\U00000036\U000020E3",
+        "\U00000037\U000020E3",
+        "\U00000038\U000020E3"
+    )
     fields = ("- \U00000031\U000020E3 19:00-21:00", "- \U00000032\U000020E3 21:00-23:00", "- \U0001F557 Con ritardo", "- \U0000274C Non disponibile", "- \U00002753 Forse")
 
     def __init__(self, bot):
@@ -26,9 +46,13 @@ class Mod(commands.Cog):
         return False
 
     # Generate the partecipation message for Clan Battles or Clan Brawl
-    async def presenze(self, ctx, type, day):
+    async def presenze(self, ctx, type, *day):
         if not(await self.check_role(ctx)):
             return None
+
+        text = ""
+        for word in day:
+            text = text + " " + word
 
         channel = self.bot.get_channel(CH_TXT_COM_DEL_COMANDO)
         message = "<@&" + str(MEMBRO_DEL_CLAN) + ">"
@@ -38,23 +62,29 @@ class Mod(commands.Cog):
 
         await channel.send(message)
 
-        # DAYLY EMBED
-        # embed=discord.Embed(title="Presenze " + type, description=day + "\n\n" + "\n".join(self.fields), color=0xffd519)
-        # embed.set_author(name="RapaxBot")
-        # embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/675275973918195712/924566156407341076/Logo_RAPAX_Cerchio.png")
+        if type == 'Clan Battle':
+            # WEEKLY EMBED
+            embed=discord.Embed(title="Presenze " + type, description=day, color=0xffd519)
+            embed.set_author(name="RapaxBot")
+            embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/675275973918195712/924566156407341076/Logo_RAPAX_Cerchio.png")
+            embed.add_field(name="Mercoledì", value=":one: 19:00-20:30 \n :two: 21:00-23:00 ", inline=False)
+            embed.add_field(name="Giovedì", value=":three: 19:00-20:30 \n :four: 21:00-23:00 ", inline=False)
+            embed.add_field(name="Sabato", value=":five: 19:00-20:30 \n :six: 21:00-23:00 ", inline=False)
+            embed.add_field(name="Domenica", value=":seven: 19:00-20:30 \n :eight: 21:00-23:00 ", inline=False)
 
-        # WEEKLY EMBED
-        embed=discord.Embed(title="Presenze " + type, description=day, color=0xffd519)
-        embed.set_author(name="RapaxBot")
-        embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/675275973918195712/924566156407341076/Logo_RAPAX_Cerchio.png")
-        embed.add_field(name="Mercoledì", value=":one: 19:00-20:30 \n :two: 21:00-23:00 ", inline=False)
-        embed.add_field(name="Giovedì", value=":three: 19:00-20:30 \n :four: 21:00-23:00 ", inline=False)
-        embed.add_field(name="Sabato", value=":five: 19:00-20:30 \n :six: 21:00-23:00 ", inline=False)
-        embed.add_field(name="Domenica", value=":seven: 19:00-20:30 \n :eight: 21:00-23:00 ", inline=False)
+            msg = await channel.send(embed = embed)
+            for element in self.votazioni_CB:
+                await msg.add_reaction(element)
 
-        msg = await channel.send(embed = embed)
-        for element in self.votazioni_cb:
-            await msg.add_reaction(element)
+        elif type == 'Clan Brawl':
+            # DAYLY EMBED
+            embed=discord.Embed(title="Presenze " + type, description=day + "\n\n" + "\n".join(self.fields), color=0xffd519)
+            embed.set_author(name="RapaxBot")
+            embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/675275973918195712/924566156407341076/Logo_RAPAX_Cerchio.png")
+
+            msg = await channel.send(embed = embed)
+            for element in self.votazioni_cb:
+                await msg.add_reaction(element)
 
     @commands.command()
     async def write(self, ctx, channel_id, *message):
@@ -102,11 +132,11 @@ class Mod(commands.Cog):
             await msg.add_reaction(element)
     
     @commands.command()
-    async def CB(self, ctx, day):
+    async def CB(self, ctx, *day):
         await self.presenze(ctx, "Clan Battle", day)
     
     @commands.command()
-    async def cb(self, ctx, day):
+    async def cb(self, ctx, *day):
         await self.presenze(ctx, "Clan Brawl", day)
 
     @commands.command()

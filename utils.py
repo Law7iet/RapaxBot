@@ -26,7 +26,7 @@ URL_SHIPS = "https://api.worldofwarships.eu/wows/encyclopedia/ships/?application
 URL_PLAYER_NICKNAME = "https://api.worldofwarships.eu/wows/account/info/?application_id=" + config.data["API"] + "&fields=nickname&account_id="
 
 # RAPAX clan's ID
-RAPAX_ID = 500183314
+RAPAX_ID = 500155506
 
 # Support fuctions
 
