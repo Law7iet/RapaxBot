@@ -1,3 +1,4 @@
+from tabnanny import check
 import config
 import requests
 
@@ -21,6 +22,7 @@ OSPITI = 680776924859334672
 URL_PLAYER_ID = "https://api.worldofwarships.eu/wows/account/list/?application_id=" + config.data["API"] + "&search="
 URL_PLAYER_CLAN_ID = "https://api.worldofwarships.eu/wows/clans/accountinfo/?application_id=" + config.data["API"] + "&account_id="
 URL_CLAN_NAME = "https://api.worldofwarships.eu/wows/clans/info/?application_id=" + config.data["API"] + "&clan_id="
+URL_CLAN_SEARCH = "https://api.worldofwarships.eu/wows/clans/info/?application_id=" + config.data["API"] + "&search="
 URL_PLAYER_SHIPS = "https://api.worldofwarships.eu/wows/ships/stats/?application_id=" + config.data["API"] + "&fields=ship_id&account_id="
 URL_SHIPS = "https://api.worldofwarships.eu/wows/encyclopedia/ships/?application_id=" + config.data["API"] + "&fields=name%2C+tier%2C+is_special%2C+is_premium%2C+type%2C+nation&page_no="
 URL_PLAYER_NICKNAME = "https://api.worldofwarships.eu/wows/account/info/?application_id=" + config.data["API"] + "&fields=nickname&account_id="
@@ -51,28 +53,40 @@ def get_player_ID(nickname):
         data = data["data"]
         data.reverse()
         data = data.pop()
-        return [data["nickname"], data["account_id"]]
+        return (data["account_id"], data["nickname"])
     except:
-        return -1
+        return (-1, -1)
 
 # Get the player's clan's ID from his ID
-def get_clan_ID(ID):
+def get_player_clan(ID):
     # get clan ID
     URL = URL_PLAYER_CLAN_ID + str(ID)
     # check data errors
     data = check_data(URL)
-    data = data["data"]
-    if data[str(ID)]["clan_id"] == None:
-        return -1
-    else:
+    try:
+        data = data["data"]
         return data[str(ID)]["clan_id"]
+    except:
+        return -1
+        
 
-# Get the clan's name form its ID
-def get_clan_name(ID):
+# Get the clan's name from its ID
+def get_clan_name_by_ID(ID):
     # get clan name
     URL = URL_CLAN_NAME + str(ID)
     # check data errors
     data = check_data(URL)
-    data = data["data"]
-    if data[str(ID)]["tag"] != None:
-        return data[str(ID)]["tag"]
+    try:
+        data = data["data"]
+        return (data[str(ID)]["name"], data[str(ID)]["tag"])
+    except:
+        return -1
+
+def get_clan_name(filter):
+    URL = URL_CLAN_SEARCH + filter
+    data = check_data(URL)
+    try:
+        data = data["data"]
+        return (data[0]["name"], data[0]["tag"])
+    except:
+        return -1

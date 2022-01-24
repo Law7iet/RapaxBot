@@ -66,7 +66,7 @@ class Mod(commands.Cog):
             # WEEKLY EMBED
             embed=discord.Embed(title="Presenze " + type, description=day, color=0xffd519)
             embed.set_author(name="RapaxBot")
-            embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/675275973918195712/924566156407341076/Logo_RAPAX_Cerchio.png")
+            embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/675275973918195712/935091515817078824/RAPAX_TONDO.png")
             embed.add_field(name="Mercoledì", value=":one: 19:00-20:30 \n :two: 21:00-23:00 ", inline=False)
             embed.add_field(name="Giovedì", value=":three: 19:00-20:30 \n :four: 21:00-23:00 ", inline=False)
             embed.add_field(name="Sabato", value=":five: 19:00-20:30 \n :six: 21:00-23:00 ", inline=False)
@@ -80,7 +80,7 @@ class Mod(commands.Cog):
             # DAYLY EMBED
             embed=discord.Embed(title="Presenze " + type, description=day + "\n\n" + "\n".join(self.fields), color=0xffd519)
             embed.set_author(name="RapaxBot")
-            embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/675275973918195712/924566156407341076/Logo_RAPAX_Cerchio.png")
+            embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/675275973918195712/935091515817078824/RAPAX_TONDO.png")
 
             msg = await channel.send(embed = embed)
             for element in self.votazioni_cb:
@@ -145,29 +145,78 @@ class Mod(commands.Cog):
             return None
         guild = ctx.guild
         members = guild.members
+        # For each member of the server
         for member in members:
+            # Only if the member has OSPITI role
             if guild.get_role(OSPITI) in member.roles:
-                user = member.display_name
-                user = re.sub(r"\[.+\]", "", user)
-                user = user.lstrip()
-                name = re.search(r"\(([A-Za-z0-9_]+)\)", user)
-                if name != None:
-                    user = re.sub(r"\(.+\)", "", user)
-                    name = name.group(1)
-                player_info = get_player_ID(user)
+                # Get Discord's member nick
+                # Split tag, nick and name
+                tmp = re.sub(r"\[.+\]", "", member.display_name)
+                tmp = re.sub(r"\(.+\)", "", tmp)
+                user_current_nickname = tmp.lstrip().rstrip()
                 try:
-                    game_nick = player_info[0]
-                    player_id = player_info[1]
-                    clan_id = get_clan_ID(player_id)
-                    new_nick = game_nick
-                    if clan_id != -1:
-                        clan_tag = get_clan_name(clan_id)
-                        new_nick = "[" + clan_tag + "] " + game_nick
-                    if name != None and len(new_nick + " (" + name + ")") <= 32:
-                        new_nick = new_nick + " (" + name + ")"
-                    await member.edit(nick=new_nick)
+                    user_current_tag = re.search("\[.+\]", member.display_name).group(0)[1:-1]
                 except:
-                    await ctx.send("Il membro `" + user + "` non è stato trovato.")
+                    user_current_tag = ''                
+                try:
+                    user_current_name = re.search("\(.+\)", member.display_name).group(0)
+                except:
+                    user_current_name = ''
+
+                try:
+                    # search nick with WoWs API
+                    player_info = get_player_ID(user_current_nickname)
+                    if player_info[0] == -1:
+                        await ctx.send("\U000026A0 Il membro `" + member.display_name + "` non è stato trovato.")
+                        continue
+                    # search tag with WoWs API
+                    clan_id = get_player_clan(player_info[0])
+                    
+                    # DEBUG
+                    # print(user_current_nickname + ": " + str(clan_id))
+                    
+                    if clan_id == None:
+                        # The player has not a clan
+                        pass
+                    elif clan_id == -1:
+                        await ctx.send("\U00002753 Errore durante `" + member.display_name + "`. `clan_id == None`")
+                        continue
+                    else:
+                        # The player has a clan
+                        # Check if the role exists, else create it
+                        clan_info = get_clan_name_by_ID(clan_id)
+                        clan_role = discord.utils.get(guild.roles, name=clan_info[0])
+                        if(clan_role == None):
+                            await guild.create_role(name = clan_info[0], hoist = True, reason = 'Tag del Clan')
+                            await ctx.send("\U0001F464 nuovo tag: `" + clan_info[0] + "`")
+                        # Change user tag
+                        if clan_info[1] != user_current_tag:
+                            user_current_tag = clan_info[1]
+                            await ctx.send("\U00002705 `" + member.display_name + "` cambiato tag `" + clan_role.name + "`")
+                        # Change user role
+                        # TO-DO: Compute and remove the old role
+                        # Add the role
+                        clan_role = discord.utils.get(guild.roles, name=clan_info[0])
+                        if not(clan_role in member.roles):                            
+                            await member.add_roles(clan_role, reason="Clan Tag")
+                            await ctx.send("\U00002705 `" + member.display_name + "` aggiunto il ruolo `" + clan_role.name + "`")
+
+                    # Change user nickname
+                    if user_current_nickname != player_info[1]:
+                        user_current_nickname = player_info[1]
+                    # set ready the new full nickname
+                    if user_current_tag != '':
+                        user_current_tag = "[" + user_current_tag + "] "
+                    new_nickname = user_current_tag + user_current_nickname + " " + user_current_name
+                    if len(new_nickname) > 32:
+                        new_nickname = user_current_tag + " " + user_current_nickname
+                    # Edit member
+                    await member.edit(nick=new_nickname)
+                
+                except:
+                    await ctx.send("\U0000203C `" + member.display_name + "` non è stato trovato.")
+
+        await ctx.send("\U0001F60A Fine!")
     
     @commands.command()
     async def prison(self, ctx, member: discord.Member, time, *message):
