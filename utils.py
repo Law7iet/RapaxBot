@@ -108,7 +108,7 @@ eventKeys = (
 )
 
 # Some Functions
-def checkData(url: str) -> dict | None:
+def checkData(url: str) -> dict:
     """
     Make an HTTP get request and check if the response is correct, checking the attribute 'status'
 
