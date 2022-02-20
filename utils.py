@@ -109,13 +109,14 @@ eventKeys = (
 
 # Some Functions
 def checkData(url: str) -> dict | None:
-    """Make an HTTP get request and check if the response is correct, checking the attribute 'status'
+    """
+    Make an HTTP get request and check if the response is correct, checking the attribute 'status'
 
     Args:
-        url (str): the url request.
+        `url` (str): the url request.
 
     Returns:
-        data: the url response. If the request is invalid, it return None.
+        `response`: the url response. If the request is invalid, it return None.
     """
     # send request
     reply = requests.get(url=url)
@@ -128,14 +129,16 @@ def checkData(url: str) -> dict | None:
         return data
 
 async def checkRole(ctx: Context, level: AuthorizationLevelEnum) -> bool:
-    """Check if the sender has the correct role.
+    """
+    Check if the sender has the correct role.
+    It's use for authotization member to trigger bot's command.
 
     Args:
-        ctx (Context): it's the context
-        level (AuthorizationLevelEnum): it's the level of authorization
+        `ctx` (Context): it's the context.
+        `level` (AuthorizationLevelEnum): it's the level of authorization.
 
     Returns:
-        boolean: it represents if the member has the 
+        `hasRole`: it represents if the member has the authorization.
     """    
     for i in range(1, int(level) + 1):
         role = get(ctx.guild.roles, id = authorizationLevel[i])

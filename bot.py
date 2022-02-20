@@ -28,7 +28,7 @@ if __name__ == "__main__":
         embed.add_field(name = "`ping`", value = "Pong!", inline = False)
         embed.add_field(name = "`dice number`", value = "Lancia un dado a `number` facce.", inline = False)
         embed.add_field(name = "`coin`", value = "Lancia una moneta.", inline = False)
-        embed.set_footer(text = "Per avere l\"ID di un messaggio o canale, bisogna attivare la modalità sviluppatore su Discord." )
+        embed.set_footer(text = "WiP! Alcuni comandi potrebbero essere differenti. Per avere l\"ID di un messaggio o canale, bisogna attivare la modalità sviluppatore su Discord." )
         await ctx.send(embed = embed)
 
     extensions = ["moderator", "entertainment", "event"]

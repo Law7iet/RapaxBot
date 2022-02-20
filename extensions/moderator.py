@@ -11,8 +11,20 @@ class Moderator(commands.Cog):
         self.bot = bot
         self.apiWargaming = ApiWarGaming()
     
-    # Generate the partecipation message for Clan Battles or Clan Brawl
     async def presenze(self, ctx: commands.context.Context, type: WowsEventEnum, message: str) -> None:
+        """
+        Generate the partecipation message for Clan Battles, Clan Brawl, Training or other events.
+        Each event is associated with the `WowsEventEnum` enum and each event has a own reaction.
+        The keys are separed from the message by 3 new lines; using 3 new lines in a row you wont be able to edit the description.
+
+        Args:
+            `ctx` (commands.context.Context): it's the context.
+            `type` (WowsEventEnum): type of the event.
+            `message` (str): the message which will be displayed in the embed as description.
+
+        Returns:
+            `None`
+        """
         if not(await checkRole(ctx, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
             return None
 
@@ -51,7 +63,20 @@ class Moderator(commands.Cog):
             await msg.add_reaction(element)
     
     @commands.command()
-    async def edit_embed(self, ctx: commands.context.Context, channelId: int, messageId: int, *, newDescription: str):
+    async def edit_embed(self, ctx: commands.context.Context, channelId: int, messageId: int, *, newDescription: str) -> None:
+        """
+        Edit the description of a embed message.
+        The old description has one '3 new lines' to separe the own message and the keys. 
+
+        Args:
+            `ctx` (commands.context.Context): it's the context.
+            `channelId` (int): the channel's ID where the message was sent.
+            `messageId` (int): the message ID.
+            `newDescription` (str): the new description of the embed.
+
+        Returns:
+            `None`
+        """        
         if not(await checkRole(ctx, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
             return None
         guild = ctx.guild
@@ -68,7 +93,18 @@ class Moderator(commands.Cog):
             return None
 
     @commands.command()
-    async def write(self, ctx: commands.context.Context, channelId: int, *, message: str):
+    async def write(self, ctx: commands.context.Context, channelId: int, *, message: str) -> None:
+        """
+        Write a message using the bot profile.
+
+        Args:
+            `ctx` (commands.context.Context): it's the context.
+            `channelId` (int): the channel's ID where you want to write.
+            `message` (str): the message you want to write.
+
+        Returns:
+            `None`
+        """        
         if not(await checkRole(ctx, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
             return None
         guild = ctx.guild
@@ -76,7 +112,19 @@ class Moderator(commands.Cog):
         await channel.send(message)
 
     @commands.command()
-    async def edit(self, ctx: commands.context.Context, channelId: int, messageId: int, *, newMessage: str):
+    async def edit(self, ctx: commands.context.Context, channelId: int, messageId: int, *, newMessage: str) -> None:
+        """
+        Edit a message sent by the bot.
+
+        Args:
+            `ctx` (commands.context.Context): it's the context.
+            `channelId` (int): the channel's ID where the message was sent.
+            `messageId` (int): the message ID.
+            `newMessage` (str): the new message.
+
+        Returns:
+            `None`
+        """        
         if not(await checkRole(ctx, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
             return None
         guild = ctx.guild
@@ -84,9 +132,20 @@ class Moderator(commands.Cog):
         message = await channel.fetch_message(messageId)
         await message.edit(content = newMessage)
 
-    # It works only for deafult's emoji and server's emoji
     @commands.command()
-    async def add_emoji(self, ctx: commands.context.Context, messageId: int, emoji: Emoji):
+    async def add_emoji(self, ctx: commands.context.Context, channelId: int, messageId: int, emoji: Emoji) -> None:
+        """
+        Add a reaction to a message. It works only for default's emoji and server's emoji.
+
+        Args:
+            `ctx` (commands.context.Context): it's the context.
+            `channelId` (int): the channel's ID where the message was sent.
+            `messageId` (int): the message ID which you want to add a reaction.
+            emoji (Emoji): the emoji you want to use as reaction.
+
+        Returns:
+            `None`
+        """        
         if not(await checkRole(ctx, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
             return None
         channel = ctx.message.channel
@@ -95,23 +154,72 @@ class Moderator(commands.Cog):
         await message.add_reaction(emoji)
     
     @commands.command()
-    async def CB(self, ctx, *, message: str):
+    async def CB(self, ctx: commands.context.Context, *, message: str) -> None:
+        """
+        Sent an embed that requests the partecipation of the Clan Battle.
+
+        Args:
+            `ctx` (commands.context.Context): it's the context.
+            `message` (str): it's the message that compares in the embed as description.
+
+        Returns:
+            `None`
+        """        
         await self.presenze(ctx, WowsEventEnum.CLAN_BATTLE, message)
     
     @commands.command()
-    async def cb(self, ctx, *, message: str):
+    async def cb(self, ctx: commands.context.Context, *, message: str) -> None:
+        """
+        Sent an embed that requests the partecipation of the Clan Brawl.
+
+        Args:
+            `ctx` (commands.context.Context): it's the context.
+            `message` (str): it's the message that compares in the embed as description.
+        
+        Returns:
+            `None`
+        """  
         await self.presenze(ctx, WowsEventEnum.CLAN_BRAWL, message)
 
     @commands.command()
-    async def training(self, ctx, *, message: str):
+    async def training(self, ctx: commands.context.Context, *, message: str) -> None:
+        """
+        Sent an embed that requests the partecipation of the training.
+
+        Args:
+            `ctx` (commands.context.Context): it's the context.
+            `message` (str): it's the message that compares in the embed as description.
+        
+        Returns:
+            `None`
+        """
         await self.presenze(ctx, WowsEventEnum.TRAINING, message)
 
     @commands.command()
-    async def event(self, ctx, *, message: str):
+    async def event(self, ctx: commands.context.Context, *, message: str) -> None:
+        """
+        Sent an embed that requests the partecipation of a event.
+
+        Args:
+            `ctx` (commands.context.Context): it's the context.
+            `message` (str): it's the message that compares in the embed as description.
+        """  
         await self.presenze(ctx, WowsEventEnum.OTHER, message)
 
     @commands.command()
-    async def nickname(self, ctx: commands.context.Context):
+    async def nickname(self, ctx: commands.context.Context) -> None:
+        """
+        Check the server's guests' nickname and role.
+        The bot change their nickname with their game nickname, using their current nickname.
+        It adds the clans tag at the beginning.
+        Each clan has a role, if not, it creates it and add it to the member.
+
+        Args:
+            ctx (commands.context.Context): it's the context.
+        
+        Returns:
+            `None`
+        """  
         if not(await checkRole(ctx, AuthorizationLevelEnum.AMMINISTRATORE)):
             return None
         guild = ctx.guild
