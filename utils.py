@@ -24,17 +24,10 @@ PRIGIONIERO = 783375143593836595
 TORPAMICI = 696828138591879189
 OSPITI = 680776924859334672
 
-authorizationLevel = [
-    -1,
-    AMMINISTRATORE,
-    COMANDANTE,
-    UFFICIALE_ESECUTIVO,
-    RECLUTATORE,
-    UFFICIALE,
-    MEMBRO_DEL_CLAN,
-    OSPITI
-]
+# Guild's ID
+RAPAX_GUILD = 680755400655765515
 
+# Some Enums
 class AuthorizationLevelEnum(IntEnum):
     AMMINISTRATORE = 1
     COMANDANTE = 2
@@ -44,19 +37,88 @@ class AuthorizationLevelEnum(IntEnum):
     MEMBRO_DEL_CLAN = 6
     OSPITI = 7
 
-class WoWsEventEnum(IntEnum):
+
+class WowsEventEnum(IntEnum):
     TRAINING = 1,
     CLAN_BRAWL = 2,
     CLAN_BATTLE = 3,
     OTHER = 4
 
-# RAPAX clan's ID
-RAPAX_ID = 500155506
 
-# Check if the recived data is correct
-def checkData(url):
+# Some Tuples
+authorizationLevel = (
+    -1,
+    AMMINISTRATORE,
+    COMANDANTE,
+    UFFICIALE_ESECUTIVO,
+    RECLUTATORE,
+    UFFICIALE,
+    MEMBRO_DEL_CLAN,
+    OSPITI
+)
+
+wowsEvent = (
+    '',
+    'allenamento',
+    'Clan Brawl',
+    'Clan Battle',
+    'torneo'
+)
+
+voteEmoji = (
+    "\U00002705",
+    "\U0000274C",
+    "\U00002753"
+)
+
+voteKeys = (
+    "- \U00002705 Presente",
+    "- \U0000274C Assente",
+    "- \U00002753 Forse"
+)
+
+CBEmoji = (
+    "\U00000031\U000020E3",
+    "\U00000032\U000020E3",
+    "\U0001F557", 
+    "\U0000274C",
+    "\U00002753"
+)
+
+CBKeys = (
+    "- \U00000031\U000020E3 19:00-21:00", 
+    "- \U00000032\U000020E3 21:00-23:00", 
+    "- \U0001F557 Arrivo tardi", 
+    "- \U0000274C Non disponibile", 
+    "- \U00002753 Forse"
+)
+
+eventEmoji = (
+    "\U00002705",
+    "\U0001F557", 
+    "\U0000274C",
+    "\U00002753"
+)
+
+eventKeys = (
+    "- \U00002705 Presente",
+    "- \U0001F557 Arrivo tardi", 
+    "- \U0000274C Assente",
+    "- \U00002753 Forse"
+)
+
+# Some Functions
+def checkData(url: str) -> dict | None:
+    """Make an HTTP get request and check if the response is correct, checking the attribute 'status'
+
+    Args:
+        url (str): the url request.
+
+    Returns:
+        data: the url response. If the request is invalid, it return None.
+    """
     # send request
-    reply = requests.get(url = url)
+    reply = requests.get(url=url)
     data = reply.json()
     # check data errors
     if data['status'] != 'ok':
@@ -65,8 +127,16 @@ def checkData(url):
     else:
         return data
 
-# Check if the sender has the correct role
-async def checkRole(ctx: Context, level: AuthorizationLevelEnum):
+async def checkRole(ctx: Context, level: AuthorizationLevelEnum) -> bool:
+    """Check if the sender has the correct role.
+
+    Args:
+        ctx (Context): it's the context
+        level (AuthorizationLevelEnum): it's the level of authorization
+
+    Returns:
+        boolean: it represents if the member has the 
+    """    
     for i in range(1, int(level) + 1):
         role = get(ctx.guild.roles, id = authorizationLevel[i])
         if role in ctx.message.author.roles:
@@ -74,9 +144,3 @@ async def checkRole(ctx: Context, level: AuthorizationLevelEnum):
     await ctx.message.delete()
     await ctx.send(ctx.message.author.display_name + " non hai i permessi")
     return False
-
-voteEmoji = (
-    "\U00002705", 
-    "\U0000274C", 
-    "\U00002753"
-)

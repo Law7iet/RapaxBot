@@ -6,58 +6,66 @@ from discord.utils import get
 from utils import *
 
 class Moderator(commands.Cog):
-    
-    reclutatori = [
-        396025435625881613,
-        354711274849959937,
-        256858029390168064,
-        284818538475159562
-    ]
-
-    CBEmoji = (
-        "\U00000031\U000020E3",
-        "\U00000032\U000020E3",
-        "\U0001F557", 
-        "\U0000274C",
-        "\U00002753"
-    )
-
-    CBKeys = (
-        "- \U00000031\U000020E3 19:00-21:00", 
-        "- \U00000032\U000020E3 21:00-23:00", 
-        "- \U0001F557 Arrivo tardi", 
-        "- \U0000274C Non disponibile", 
-        "- \U00002753 Forse"
-    )
 
     def __init__(self, bot: commands.Cog):
         self.bot = bot
         self.apiWargaming = ApiWarGaming()
     
     # Generate the partecipation message for Clan Battles or Clan Brawl
-    async def presenze(self, ctx: commands.context.Context, type: WoWsEventEnum, *, day: str):
-        if not(await checkRole(ctx)):
+    async def presenze(self, ctx: commands.context.Context, type: WowsEventEnum, message: str) -> None:
+        if not(await checkRole(ctx, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
             return None
 
         channel = self.bot.get_channel(CH_TXT_COM_DEL_COMANDO)
-        message = "<@&" + str(MEMBRO_DEL_CLAN) + ">"
+        ping = "<@&" + str(MEMBRO_DEL_CLAN) + ">"
         # TEST MODE
-        channel = self.bot.get_channel(CH_TXT_TESTING)
-        message = "<@&" + str(OSPITI) + ">"
+        # channel = self.bot.get_channel(CH_TXT_TESTING)
+        # ping = "<@&" + str(OSPITI) + ">"
 
-        embed=Embed(title = "Presenze " + type, description = day + "\n\n" + "\n".join(self.CBKeys), color = 0xffd519)
-        embed.set_author(name="RapaxBot")
-        if type == WoWsEventEnum.CLAN_BATTLE:
-            embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/675275973918195712/944874666164637736/clanBattle.png")
-        elif type == WoWsEventEnum.CLAN_BRAWL:
-            embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/675275973918195712/944874666391142500/clanBrawl.png")
+        title = "Presenze " + wowsEvent[int(type)]
+        if type == WowsEventEnum.CLAN_BATTLE:
+            keys = CBKeys
+            reactions = CBEmoji
+            icon = "https://cdn.discordapp.com/attachments/675275973918195712/944874666164637736/clanBattle.png"
+        elif type == WowsEventEnum.CLAN_BRAWL:
+            keys = CBKeys
+            reactions = CBEmoji
+            icon = "https://cdn.discordapp.com/attachments/675275973918195712/944874666391142500/clanBrawl.png"
+        elif type == WowsEventEnum.TRAINING:
+            keys = eventKeys
+            reactions = eventEmoji
+            icon = "https://cdn.discordapp.com/attachments/675275973918195712/944964438652506192/training.png"
+        elif type == WowsEventEnum.OTHER:
+            keys = voteKeys
+            reactions = voteEmoji
+            icon = 'https://cdn.discordapp.com/attachments/675275973918195712/944988546811461653/rapax.png'
         else:
             return None
+        embed = Embed(title = title, description = message + "\n\n\n" + "\n".join(keys), color = 0xffd519)
+        embed.set_author(name = "RapaxBot")
+        embed.set_thumbnail(url = icon)
 
-        await channel.send(message)
+        await channel.send(ping)
         msg = await channel.send(embed = embed)
-        for element in self.CBEmoji:
+        for element in reactions:
             await msg.add_reaction(element)
+    
+    @commands.command()
+    async def edit_embed(self, ctx: commands.context.Context, channelId: int, messageId: int, *, newDescription: str):
+        if not(await checkRole(ctx, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
+            return None
+        guild = ctx.guild
+        channel = guild.get_channel(channelId)
+        message = await channel.fetch_message(messageId)
+        try:
+            embed = message.embeds[0]
+            oldDescription = embed.description.split('\n\n\n')
+            oldDescription[0] = newDescription
+            description = oldDescription[0] + '\n\n\n' + oldDescription[1]
+            embed.description = description
+            await message.edit(embed = embed)
+        except:
+            return None
 
     @commands.command()
     async def write(self, ctx: commands.context.Context, channelId: int, *, message: str):
@@ -87,12 +95,20 @@ class Moderator(commands.Cog):
         await message.add_reaction(emoji)
     
     @commands.command()
-    async def CB(self, ctx, *day):
-        await self.presenze(ctx, WoWsEventEnum.CLAN_BATTLE, day)
+    async def CB(self, ctx, *, message: str):
+        await self.presenze(ctx, WowsEventEnum.CLAN_BATTLE, message)
     
     @commands.command()
-    async def cb(self, ctx, *day):
-        await self.presenze(ctx, WoWsEventEnum.CLAN_BRAWL, day)
+    async def cb(self, ctx, *, message: str):
+        await self.presenze(ctx, WowsEventEnum.CLAN_BRAWL, message)
+
+    @commands.command()
+    async def training(self, ctx, *, message: str):
+        await self.presenze(ctx, WowsEventEnum.TRAINING, message)
+
+    @commands.command()
+    async def event(self, ctx, *, message: str):
+        await self.presenze(ctx, WowsEventEnum.OTHER, message)
 
     @commands.command()
     async def nickname(self, ctx: commands.context.Context):
@@ -117,7 +133,6 @@ class Moderator(commands.Cog):
                     user_current_name = re.search("\(.+\)", member.display_name).group(0)
                 except:
                     user_current_name = ''
-
                 try:
                     # search nick with WoWs API
                     player_info = self.apiWargaming.getPlayerByNick(userCurrentNickname)
