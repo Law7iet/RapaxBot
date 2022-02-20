@@ -1,19 +1,19 @@
-import discord
-from discord.ext import commands
 import config
+from discord import Intents, Embed
+from discord.ext import commands
 from utils import *
 
 if __name__ == "__main__":
 
     # Bot's setup
-    intents = discord.Intents.default()
+    intents = Intents.default()
     intents.members = True
     bot = commands.Bot(command_prefix = config.data["PREFIX"], intents = intents)
     bot.remove_command("help")
 
     @bot.command()
     async def help(ctx):
-        embed = discord.Embed(color=0xffd519)
+        embed = Embed(color=0xffd519)
         embed.description = "Il prefisso da usare è: `>`."
         embed.set_author(name = "RapaxBot", icon_url = "https://cdn.discordapp.com/attachments/675275973918195712/924566156407341076/Logo_RAPAX_Cerchio.png")
         embed.add_field(name = "`CB giorno`", value = "Genera in *com-del-comando* un messaggio per le presenze delle Clan Battle per il giorno *giorno*.", inline = False)
@@ -31,7 +31,7 @@ if __name__ == "__main__":
         embed.set_footer(text = "Per avere l\"ID di un messaggio o canale, bisogna attivare la modalità sviluppatore su Discord." )
         await ctx.send(embed = embed)
 
-    extensions = ["mod", "entmt"]
+    extensions = ["moderator", "entertainment", "event"]
     for extension in extensions:
         try:
             bot.load_extension("extensions." + extension)

@@ -1,6 +1,7 @@
-from tabnanny import check
-import config
 import requests
+from discord.utils import get
+from discord.ext.commands.context import Context
+from enum import IntEnum
 
 # Channels' ID
 CH_TXT_TESTING = 711212263062765608
@@ -17,80 +18,65 @@ AMMINISTRATORE = 680772355940679689
 COMANDANTE = 680766448553295919
 UFFICIALE_ESECUTIVO = 680766526953095179
 RECLUTATORE = 680766568531361792
+UFFICIALE = 708602735100166215
 MEMBRO_DEL_CLAN = 680766615234543662
 PRIGIONIERO = 783375143593836595
 TORPAMICI = 696828138591879189
 OSPITI = 680776924859334672
 
-# WoWs API
-URL_PLAYER_ID = "https://api.worldofwarships.eu/wows/account/list/?application_id=" + config.data["API"] + "&search="
-URL_PLAYER_CLAN_ID = "https://api.worldofwarships.eu/wows/clans/accountinfo/?application_id=" + config.data["API"] + "&account_id="
-URL_CLAN_NAME = "https://api.worldofwarships.eu/wows/clans/info/?application_id=" + config.data["API"] + "&clan_id="
-URL_CLAN_SEARCH = "https://api.worldofwarships.eu/wows/clans/info/?application_id=" + config.data["API"] + "&search="
-URL_PLAYER_SHIPS = "https://api.worldofwarships.eu/wows/ships/stats/?application_id=" + config.data["API"] + "&fields=ship_id&account_id="
-URL_SHIPS = "https://api.worldofwarships.eu/wows/encyclopedia/ships/?application_id=" + config.data["API"] + "&fields=name%2C+tier%2C+is_special%2C+is_premium%2C+type%2C+nation&page_no="
-URL_PLAYER_NICKNAME = "https://api.worldofwarships.eu/wows/account/info/?application_id=" + config.data["API"] + "&fields=nickname&account_id="
+authorizationLevel = [
+    -1,
+    AMMINISTRATORE,
+    COMANDANTE,
+    UFFICIALE_ESECUTIVO,
+    RECLUTATORE,
+    UFFICIALE,
+    MEMBRO_DEL_CLAN,
+    OSPITI
+]
+
+class AuthorizationLevelEnum(IntEnum):
+    AMMINISTRATORE = 1
+    COMANDANTE = 2
+    UFFICIALE_ESECUTIVO = 3
+    RECLUTATORE = 4
+    UFFICIALE = 5
+    MEMBRO_DEL_CLAN = 6
+    OSPITI = 7
+
+class WoWsEventEnum(IntEnum):
+    TRAINING = 1,
+    CLAN_BRAWL = 2,
+    CLAN_BATTLE = 3,
+    OTHER = 4
 
 # RAPAX clan's ID
 RAPAX_ID = 500155506
 
-# Support fuctions
-
 # Check if the recived data is correct
-def check_data(URL):
+def checkData(url):
     # send request
-    reply = requests.get(url = URL)
+    reply = requests.get(url = url)
     data = reply.json()
     # check data errors
-    if data["status"] != "ok":
-        return "Status error: " + data["status"]
+    if data['status'] != 'ok':
+        print('Status error: ' + data['status'])
+        return None
     else:
         return data
 
-# Get the player's ID from his nickname
-def get_player_ID(nickname):
-    # get player ID
-    URL = URL_PLAYER_ID + nickname
-    # check data errors
-    data = check_data(URL)
-    try:
-        data = data["data"]
-        data.reverse()
-        data = data.pop()
-        return (data["account_id"], data["nickname"])
-    except:
-        return (-1, -1)
+# Check if the sender has the correct role
+async def checkRole(ctx: Context, level: AuthorizationLevelEnum):
+    for i in range(1, int(level) + 1):
+        role = get(ctx.guild.roles, id = authorizationLevel[i])
+        if role in ctx.message.author.roles:
+            return True
+    await ctx.message.delete()
+    await ctx.send(ctx.message.author.display_name + " non hai i permessi")
+    return False
 
-# Get the player's clan's ID from his ID
-def get_player_clan(ID):
-    # get clan ID
-    URL = URL_PLAYER_CLAN_ID + str(ID)
-    # check data errors
-    data = check_data(URL)
-    try:
-        data = data["data"]
-        return data[str(ID)]["clan_id"]
-    except:
-        return -1
-        
-
-# Get the clan's name from its ID
-def get_clan_name_by_ID(ID):
-    # get clan name
-    URL = URL_CLAN_NAME + str(ID)
-    # check data errors
-    data = check_data(URL)
-    try:
-        data = data["data"]
-        return (data[str(ID)]["name"], data[str(ID)]["tag"])
-    except:
-        return -1
-
-def get_clan_name(filter):
-    URL = URL_CLAN_SEARCH + filter
-    data = check_data(URL)
-    try:
-        data = data["data"]
-        return (data[0]["name"], data[0]["tag"])
-    except:
-        return -1
+voteEmoji = (
+    "\U00002705", 
+    "\U0000274C", 
+    "\U00002753"
+)

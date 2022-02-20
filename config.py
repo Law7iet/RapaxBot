@@ -9,5 +9,5 @@ except:
     data = {
         "PREFIX": os.environ["PREFIX"],
         "TOKEN": os.environ["TOKEN"],
-        "API": os.environ["API"]
+        "APPLICATION_ID": os.environ["APPLICATION_ID"]
     }
