@@ -8,9 +8,10 @@ class ApiWarGaming:
         self.urlPlayerPersonalData = 'https://api.worldofwarships.eu/wows/account/info/?application_id=' + config.data['APPLICATION_ID'] + '&account_id='
         self.urlClans = 'https://api.worldofwarships.eu/wows/clans/list/?application_id=' + config.data['APPLICATION_ID'] + '&search='
         self.urlClanDetails = 'https://api.worldofwarships.eu/wows/clans/info/?application_id=' + config.data['APPLICATION_ID'] + '&clan_id='
-        self.urlPlayerClanData = 'https://api.worldofwarships.eu/wows/clans/accountinfo/?application_id=' + config.data['APPLICATION_ID'] + '&account_id='        
         self.urlClanRanking = 'https://clans.worldofwarships.eu/api/clanbase/'
-        self.urlShips = 'https://api.worldofwarships.eu/wows/encyclopedia/ships/?application_id=' + config.data['APPLICATION_ID'] + '&fields=name%2C+tier%2C+is_special%2C+is_premium%2C+type%2C+nation&page_no='
+        self.urlShips = 'https://api.worldofwarships.eu/wows/encyclopedia/ships/?application_id=' + config.data['APPLICATION_ID'] + '&fields=name%2C+tier%2C+ship_id%2C+is_special%2C+is_premium%2C+type%2C+nation&page_no='
+        self.urlPlayerShips = 'https://api.worldofwarships.eu/wows/ships/stats/?application_id=' + config.data['APPLICATION_ID'] + '&fields=ship_id&account_id='
+        self.urlPlayerClanData = 'https://api.worldofwarships.eu/wows/clans/accountinfo/?application_id=' + config.data['APPLICATION_ID'] + '&account_id='        
 
     def getClanRanking(self, clanId: int) -> list:
         '''
@@ -25,15 +26,67 @@ class ApiWarGaming:
             `list`: the list of ratings.
         '''        
         url = self.urlClanRanking + str(clanId) + '/claninfo/'
-        return json.loads((requests.get(url = url)).text)['clanview']['wows_ladder']['ratings']
+        try:
+            return json.loads((requests.get(url = url)).text)['clanview']['wows_ladder']['ratings']
+        except:
+            return []
 
-    def getUrlShips(self) -> str:
+    def getShips(self) -> list:
         '''
-        Returns the url for the information of World of Warhips ships.
+        Returns a list with all World of Warships' ships.
         
         Returns:
-            `str`: the url.
+            `list`: the list with all ships. If an error occurs, it returns an empty list.
         '''
+        ships = []
+        page = 1
+        while True:
+            responseShips = checkData(self.urlShips + str(page))
+            if responseShips == None:
+                return []
+
+            ships = ships.append(responseShips['data'])
+            page = page + 1
+            if page > responseShips['meta']['page_total']:
+                break
+
+        return ships
+
+    def getClanMembers(self, clanId: int) -> list:
+        '''
+        Returns the list of the player's ID of the clan's ID passed in input.
+
+        Args:
+            `clanId` (int): the clan ID.
+
+        Returns:
+            `list`: the players' ID.
+        '''        
+        clanMembers = []
+        responseClanDetails = checkData(self.urlClanDetails + str(clanId))
+        if responseClanDetails == None:
+            return clanMembers
+        for id in responseClanDetails['data'][str(clanId)]['members_ids']:
+            clanMembers.append(id)
+        return clanMembers
+    
+    def getPlayerShips(self, playerId: int) -> list:
+        '''
+        Returns the list of the player's ships.
+
+        Args:
+            `playerId` (int): the player ID.
+
+        Returns:
+            `list`: the players' ships.
+        '''  
+        ships = []
+        responseMemberData = checkData(self.urlPlayerShips + str(playerId))
+        if responseMemberData == None:
+            return ships
+        for ship in responseMemberData['data'][str(playerId)]:
+            ships.append(ship['ship_id'])
+        return ships
 
     def getPlayerByNick(self, nickname: str) -> tuple | None:
         '''
