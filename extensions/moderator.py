@@ -203,6 +203,9 @@ class Moderator(commands.Cog):
         Args:
             `ctx` (commands.context.Context): it's the context.
             `message` (str): it's the message that compares in the embed as description.
+
+        Returns:
+            `None`
         """  
         await self.presenze(ctx, WowsEventEnum.OTHER, message)
 
