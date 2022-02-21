@@ -108,7 +108,7 @@ eventKeys = (
 )
 
 # Some Functions
-def checkData(url: str) -> dict:
+def checkData(url: str) -> dict | None:
     """
     Make an HTTP get request and check if the response is correct, checking the attribute 'status'
 
@@ -116,7 +116,7 @@ def checkData(url: str) -> dict:
         `url` (str): the url request.
 
     Returns:
-        `response`: the url response. If the request is invalid, it return None.
+        `dict`: it's the url response. If the request is invalid, it returns `None`.
     """
     # send request
     reply = requests.get(url=url)
@@ -138,7 +138,7 @@ async def checkRole(ctx: Context, level: AuthorizationLevelEnum) -> bool:
         `level` (AuthorizationLevelEnum): it's the level of authorization.
 
     Returns:
-        `hasRole`: it represents if the member has the authorization.
+        `bool`: it represents if the member has the authorization.
     """    
     for i in range(1, int(level) + 1):
         role = get(ctx.guild.roles, id = authorizationLevel[i])
