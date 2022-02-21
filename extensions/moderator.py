@@ -1,9 +1,10 @@
 import re
-from apiWarGaming import ApiWarGaming
 from discord import Embed, Emoji
 from discord.ext import commands
 from discord.utils import get
-from utils import *
+from utils.constants import *
+from utils.functions import *
+from utils.apiWarGaming import ApiWarGaming
 
 class Moderator(commands.Cog):
 

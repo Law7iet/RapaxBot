@@ -3,7 +3,8 @@ from discord import Embed, Member
 from discord.ext import commands
 from random import choice
 from random import randrange
-from utils import *
+from utils.constants import *
+from utils.functions import *
 
 class Entertainment(commands.Cog):
     def __init__(self, bot: commands.Cog):

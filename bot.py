@@ -1,7 +1,6 @@
 import config
 from discord import Intents, Embed
 from discord.ext import commands
-from utils import *
 
 if __name__ == "__main__":
 

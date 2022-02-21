@@ -1,6 +1,7 @@
 import config
 import json
-from utils import *
+from utils.constants import *
+from utils.functions import *
 
 class ApiWarGaming:
     def __init__(self):
@@ -38,19 +39,19 @@ class ApiWarGaming:
         Returns:
             `list`: the list with all ships. If an error occurs, it returns an empty list.
         '''
-        ships = []
+        ships = {}
         page = 1
         while True:
             responseShips = checkData(self.urlShips + str(page))
             if responseShips == None:
                 return []
 
-            ships = ships.append(responseShips['data'])
+            ships.update(responseShips['data'])
             page = page + 1
             if page > responseShips['meta']['page_total']:
                 break
 
-        return ships
+        return ships.items()
 
     def getClanMembers(self, clanId: int) -> list:
         '''
@@ -106,6 +107,26 @@ class ApiWarGaming:
             return (data['account_id'], data['nickname'])
         except:
             return None
+
+    def getPlayerById(self, id: str) -> tuple | None:
+        '''
+        Search the player whose ID matches with the parameter and returns its nickname and its ID.
+
+        Args:
+            `nickname` (str): the nickname.
+
+        Returns:
+            `tuple`: it contains the id and nickname. If the input nickname doesn't match with any player, it returns `None`.
+        '''
+        url = self.urlPlayerPersonalData + id
+        # api call and check if the response is ok
+        response = checkData(url)
+        try:
+            data = response['data'][str(id)]
+            return (data['account_id'], data['nickname'])
+        except:
+            return None
+
 
     def getClanByPlayerId(self, id: int) -> tuple | None:
         '''

@@ -1,6 +1,7 @@
 from discord import Member
 from discord.ext import commands
-from utils import *
+from utils.constants import *
+from utils.functions import *
 
 class Event(commands.Cog):
     def __init__(self, bot: commands.Cog):
