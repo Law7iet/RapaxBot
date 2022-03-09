@@ -38,11 +38,11 @@ class Moderator(commands.Cog):
         if type == WowsEventEnum.CLAN_BATTLE:
             keys = CBKeys
             reactions = CBEmoji
-            icon = "https://cdn.discordapp.com/attachments/675275973918195712/944874666164637736/clanBattle.png"
+            icon = "https://cdn.discordapp.com/attachments/675275973918195712/951066454596419604/clanBattle.png"
         elif type == WowsEventEnum.CLAN_BRAWL:
             keys = CBKeys
             reactions = CBEmoji
-            icon = "https://cdn.discordapp.com/attachments/675275973918195712/944874666391142500/clanBrawl.png"
+            icon = "https://cdn.discordapp.com/attachments/675275973918195712/951066455032598578/clanBrawl.png"
         elif type == WowsEventEnum.TRAINING:
             keys = eventKeys
             reactions = eventEmoji
