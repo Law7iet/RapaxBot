@@ -1,5 +1,5 @@
 import config
-from discord import Intents, Embed
+from discord import Intents, Embed, Activity, ActivityType
 from discord.ext import commands
 
 if __name__ == "__main__":
@@ -7,7 +7,7 @@ if __name__ == "__main__":
     # Bot's setup
     intents = Intents.default()
     intents.members = True
-    bot = commands.Bot(command_prefix = config.data["PREFIX"], intents = intents)
+    bot = commands.Bot(command_prefix = config.data["PREFIX"], intents = intents, activity = Activity(type = ActivityType.watching, name = "la tua webcam."))
     bot.remove_command("help")
 
     @bot.command()

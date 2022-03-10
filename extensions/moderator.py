@@ -267,7 +267,7 @@ class Moderator(commands.Cog):
                         # Change user tag
                         if clan_info[1] != user_current_tag:
                             user_current_tag = clan_info[1]
-                            await ctx.send("\U00002705 `" + member.display_name + "` cambiato tag `" + clan_role.name + "`")
+                            await ctx.send("\U00002705 `" + member.display_name + "` cambiato tag `" + clan_info[1] + "`")
                         # Change user role
                         # TO-DO: Compute and remove the old role
                         # Add the role
