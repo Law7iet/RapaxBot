@@ -62,7 +62,7 @@ class ClanShips:
         Returns:
             `None`
         """
-        responseShips = self.apiWarGaming.getShips()
+        responseShips = self.apiWarGaming.get_ships()
         if responseShips == []:
             return None
         for shipElement in responseShips:
@@ -160,20 +160,20 @@ class ClanShips:
         # returned dict
         mappedList = {}
         # Request clan's members' ID
-        responseClanDetails = self.apiWarGaming.getClanMembers(clanId)
+        responseClanDetails = self.apiWarGaming.get_clan_members(clanId)
         if responseClanDetails == []:
             return mappedList
 
         # For each member
         for id in responseClanDetails:
             try:
-                response = self.apiWarGaming.getPlayerById(str(id))
+                response = self.apiWarGaming.get_player_by_id(str(id))
                 if response == None:
                     continue
                 playerNickname = response[1]
                 mappedShips = self.getPlayerTable()
                 # Get member's ships
-                responseMemberShips = self.apiWarGaming.getPlayerShips(str(id))
+                responseMemberShips = self.apiWarGaming.get_player_ships(str(id))
                 if responseMemberShips == []:
                     continue
                 # For each member's ship

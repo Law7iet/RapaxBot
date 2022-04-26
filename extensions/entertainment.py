@@ -6,6 +6,7 @@ from random import randrange
 from utils.constants import *
 from utils.functions import *
 
+
 class Entertainment(commands.Cog):
     def __init__(self, bot: commands.Cog):
         self.bot = bot
@@ -13,21 +14,22 @@ class Entertainment(commands.Cog):
     @commands.command()
     async def ping(self, ctx: commands.context.Context) -> None:
         """
-        A simple command that respons with "Pong!".
+        A simple command that responses with "Pong!".
 
         Args:
             `ctx` (commands.context.Context): it's the context.
         
         Returns:
             `None`
-        """        
+        """
         await ctx.send('Pong!')
 
     @commands.command()
-    async def vote(self, ctx: commands.context.Context, channelId: int, messageId: int) -> None:
+    async def vote(self, ctx: commands.context.Context, channel_id: int, message_id: int) -> None:
         """
-        Add 3 reactions to the a message; the reactions are "\U00002705, \U0000274C, and \U00002753.
-        If the message's author is the person who called this command, it add the emojis if the caller is at least an executive officer.
+        Add 3 reactions to the message; the reactions are \U00002705, \U0000274C, and \U00002753.
+        If the message's author is the person who called this command, it adds the emojis if the caller is at least an
+        executive officer.
 
         Args:
             `ctx` (commands.context.Context): it's the context.
@@ -39,10 +41,10 @@ class Entertainment(commands.Cog):
         """
         author = ctx.message.author
         guild = ctx.guild
-        channel = guild.get_channel(channelId)
-        msg = await channel.fetch_message(messageId)
+        channel = guild.get_channel(channel_id)
+        msg = await channel.fetch_message(message_id)
         if msg.author != author:
-            if not(await checkRole(ctx, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
+            if not (await check_role(ctx, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
                 return None
         await ctx.message.delete()
         for element in voteEmoji:
@@ -51,8 +53,8 @@ class Entertainment(commands.Cog):
     @commands.command()
     async def dice(self, ctx: commands.context.Context, *parameters: tuple) -> None:
         """
-        Throws a dice.
-        By default, the dice has 6 sides, but you can change the number of sides writing the number as input.
+        Throws a die.
+        By default, the dice has 6 sides, but you can change the number of sides writing the number than input.
 
         Args:
             `ctx` (commands.context.Context): it's the context.
@@ -60,8 +62,8 @@ class Entertainment(commands.Cog):
 
         Returns:
             `None`
-        """        
-        if not(await checkRole(ctx, AuthorizationLevelEnum.OSPITI)):
+        """
+        if not (await check_role(ctx, AuthorizationLevelEnum.OSPITI)):
             return None
         number = -1
         if len(parameters) == 0:
@@ -75,9 +77,10 @@ class Entertainment(commands.Cog):
             await ctx.send(randrange(number) + 1)
         else:
             embed = Embed(title='Comando non corretto', description='Il comando può essere:', color=0xffd519)
-            embed.set_author(name = 'RapaxBot', icon_url = 'https://cdn.discordapp.com/attachments/675275973918195712/924566156407341076/Logo_RAPAX_Cerchio.png')
+            embed.set_author(name='RapaxBot', icon_url='https://cdn.discordapp.com/attachments/675275973918195712/924566156407341076/Logo_RAPAX_Cerchio.png')
             embed.add_field(name='`>dice`', value='Tira un dado a 6 facce.', inline=False)
-            embed.add_field(name='`>dice x`', value='Tira un dado a `x` facce; `x` è un numero intero positivo.', inline=True)
+            embed.add_field(name='`>dice x`', value='Tira un dado a `x` facce; `x` è un numero intero positivo.',
+                            inline=True)
             await ctx.send(embed=embed)
 
     @commands.command()
@@ -90,8 +93,8 @@ class Entertainment(commands.Cog):
 
         Returns:
             `None`
-        """        
-        if not(await checkRole(ctx, AuthorizationLevelEnum.OSPITI)):
+        """
+        if not (await check_role(ctx, AuthorizationLevelEnum.OSPITI)):
             return None
         moneta = ['Testa', 'Croce']
         await ctx.send(choice(moneta))
@@ -111,8 +114,8 @@ class Entertainment(commands.Cog):
 
         Returns:
             `None`
-        """        
-        if not(await checkRole(ctx, AuthorizationLevelEnum.UFFICIALE)):
+        """
+        if not (await check_role(ctx, AuthorizationLevelEnum.UFFICIALE)):
             return None
         guild = ctx.guild
         channel_text_prison = guild.get_channel(CH_TXT_PRIGIONE)
@@ -133,9 +136,9 @@ class Entertainment(commands.Cog):
         await member.add_roles(role)
         # Move the member to prison voice chat
         try:
-            member.voice.channel != None
-            channel_voice = member.voice.channel
-            await member.move_to(channel_voice_prison)
+            if member.voice.channel is not None:
+                channel_voice = member.voice.channel
+                await member.move_to(channel_voice_prison)
         except:
             pass
         # Send ack
@@ -166,8 +169,8 @@ class Entertainment(commands.Cog):
 
         Returns:
             `None`
-        """        
-        if not(await checkRole(ctx, AuthorizationLevelEnum.MEMBRO_DEL_CLAN)):
+        """
+        if not (await check_role(ctx, AuthorizationLevelEnum.MEMBRO_DEL_CLAN)):
             return None
         guild = ctx.guild
         channel = guild.get_channel(CH_TXT_PRIGIONE)
@@ -187,6 +190,7 @@ class Entertainment(commands.Cog):
         await member.remove_roles(role)
         # Send ack
         await channel.send(member.name + ' non è più torpamico.')
+
 
 def setup(bot):
     bot.add_cog(Entertainment(bot))

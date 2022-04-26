@@ -30,7 +30,7 @@ if __name__ == "__main__":
         embed.set_footer(text = "WiP! Alcuni comandi potrebbero essere differenti. Per avere l\"ID di un messaggio o canale, bisogna attivare la modalità sviluppatore su Discord." )
         await ctx.send(embed = embed)
 
-    extensions = ["moderator", "entertainment", "event"]
+    extensions = ["moderation", "entertainment", "event"]
     for extension in extensions:
         try:
             bot.load_extension("extensions." + extension)
