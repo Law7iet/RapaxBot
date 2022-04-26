@@ -1,9 +1,11 @@
 import re
+
 from discord import Embed, Emoji
 from discord.ext import commands
+
+from utils.apiWarGaming import ApiWarGaming
 from utils.constants import *
 from utils.functions import *
-from utils.apiWarGaming import ApiWarGaming
 
 
 class Moderation(commands.Cog):
@@ -28,12 +30,12 @@ class Moderation(commands.Cog):
         """
         if not (await check_role(ctx, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
             return None
-
         channel = self.bot.get_channel(CH_TXT_CALENDARIO)
         ping = "<@&" + str(MEMBRO_DEL_CLAN) + ">"
         # TEST MODE
-        # channel = self.bot.get_channel(CH_TXT_TESTING)
-        # ping = "<@&" + str(OSPITI) + ">"
+        if DEBUG:
+            channel = self.bot.get_channel(CH_TXT_TESTING)
+            ping = "<@&" + str(OSPITI) + ">"
 
         title = "Presenze " + wowsEvent[int(event_type)]
         if event_type == WowsEventEnum.CLAN_BATTLE:
@@ -64,16 +66,16 @@ class Moderation(commands.Cog):
             await msg.add_reaction(element)
 
     @commands.command()
-    async def edit_embed(self, ctx: commands.context.Context, channelId: int, messageId: int, *,
+    async def edit_embed(self, ctx: commands.context.Context, channel_id: int, message_id: int, *,
                          newDescription: str) -> None:
         """
         Edit the description of an embed message.
-        The old description has one '3 new lines' to separe the own message and the keys. 
+        The old description has one '3 new lines' to separate the own message and the keys.
 
         Args:
             ctx: it's the context.
-            channelId: the channel's ID where the message was sent.
-            messageId: the message ID.
+            channel_id: the channel's ID where the message was sent.
+            message_id: the message ID.
             newDescription: the new description of the embed.
 
         Returns:
@@ -82,13 +84,13 @@ class Moderation(commands.Cog):
         if not (await check_role(ctx, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
             return None
         guild = ctx.guild
-        channel = guild.get_channel(channelId)
-        message = await channel.fetch_message(messageId)
+        channel = guild.get_channel(channel_id)
+        message = await channel.fetch_message(message_id)
         try:
             embed = message.embeds[0]
-            oldDescription = embed.description.split('\n\n\n')
-            oldDescription[0] = newDescription
-            description = oldDescription[0] + '\n\n\n' + oldDescription[1]
+            old_description = embed.description.split('\n\n\n')
+            old_description[0] = newDescription
+            description = old_description[0] + '\n\n\n' + old_description[1]
             embed.description = description
             await message.edit(embed=embed)
         except:
@@ -114,15 +116,15 @@ class Moderation(commands.Cog):
         await channel.send(message)
 
     @commands.command()
-    async def edit(self, ctx: commands.context.Context, channelId: int, messageId: int, *, newMessage: str) -> None:
+    async def edit(self, ctx: commands.context.Context, channel_id: int, message_id: int, *, new_message: str) -> None:
         """
         Edit a message sent by the bot.
 
         Args:
             ctx: it's the context.
-            channelId: the channel's ID where the message was sent.
-            messageId: the message ID.
-            newMessage: the new message.
+            channel_id: the channel's ID where the message was sent.
+            message_id: the message ID.
+            new_message: the new message.
 
         Returns:
             None
@@ -130,9 +132,9 @@ class Moderation(commands.Cog):
         if not (await check_role(ctx, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
             return None
         guild = ctx.guild
-        channel = guild.get_channel(channelId)
-        message = await channel.fetch_message(messageId)
-        await message.edit(content=newMessage)
+        channel = guild.get_channel(channel_id)
+        message = await channel.fetch_message(message_id)
+        await message.edit(content=new_message)
 
     @commands.command()
     async def add_emoji(self, ctx: commands.context.Context, channel_id: int, message_id: int, emoji: Emoji) -> None:
@@ -150,9 +152,10 @@ class Moderation(commands.Cog):
         """
         if not (await check_role(ctx, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
             return None
-        channel = ctx.message.channel
-        await ctx.message.delete()
+        guild = ctx.guild
+        channel = guild.get_channel(channel_id)
         message = await channel.fetch_message(message_id)
+        await ctx.message.delete()
         await message.add_reaction(emoji)
 
     @commands.command()
@@ -186,7 +189,7 @@ class Moderation(commands.Cog):
     @commands.command()
     async def training(self, ctx: commands.context.Context, *, message: str) -> None:
         """
-        Sent an embed that requests the partecipation of the training.
+        Sent an embed that requests the participation of the training.
 
         Args:
             ctx: it's the context.
@@ -200,7 +203,7 @@ class Moderation(commands.Cog):
     @commands.command()
     async def event(self, ctx: commands.context.Context, *, message: str) -> None:
         """
-        Sent an embed that requests the partecipation of a event.
+        Sent an embed that requests the participation of a event.
 
         Args:
             ctx: it's the context.
@@ -237,7 +240,7 @@ class Moderation(commands.Cog):
                 # Split tag, nick and name
                 tmp = re.sub(r"\[.+\]", "", member.display_name)
                 tmp = re.sub(r"\(.+\)", "", tmp)
-                userCurrentNickname = tmp.lstrip().rstrip()
+                user_current_nickname = tmp.lstrip().rstrip()
                 try:
                     user_current_tag = re.search("\[.+\]", member.display_name).group(0)[1:-1]
                 except:
@@ -248,15 +251,15 @@ class Moderation(commands.Cog):
                     user_current_name = ''
                 try:
                     # search nick with WoWs API
-                    player_info = self.apiWargaming.get_player_by_nick(userCurrentNickname)
+                    player_info = self.apiWargaming.get_player_by_nick(user_current_nickname)
                     if player_info is None:
                         await ctx.send("\U000026A0 Il membro `" + member.display_name + "` non è stato trovato.")
                         continue
                     # search tag with WoWs API
                     clan_id = self.apiWargaming.get_clan_by_player_id(player_info[0])
 
-                    # DEBUG
-                    # print(user_current_nickname + ": " + str(clan_id))
+                    if DEBUG:
+                        print(user_current_nickname + ": " + str(clan_id))
 
                     if clan_id is None:
                         # The player has not a clan
@@ -283,14 +286,14 @@ class Moderation(commands.Cog):
                                 "\U00002705 `" + member.display_name + "` aggiunto il ruolo `" + clan_role.name + "`")
 
                     # Change user nickname
-                    if userCurrentNickname != player_info[1]:
-                        userCurrentNickname = player_info[1]
+                    if user_current_nickname != player_info[1]:
+                        user_current_nickname = player_info[1]
                     # set ready the new full nickname
                     if user_current_tag != '':
                         user_current_tag = "[" + user_current_tag + "] "
-                    new_nickname = user_current_tag + userCurrentNickname + " " + user_current_name
+                    new_nickname = user_current_tag + user_current_nickname + " " + user_current_name
                     if len(new_nickname) > 32:
-                        new_nickname = user_current_tag + " " + userCurrentNickname
+                        new_nickname = user_current_tag + " " + user_current_nickname
                     # Edit member
                     await member.edit(nick=new_nickname)
 
@@ -301,7 +304,7 @@ class Moderation(commands.Cog):
 
     @commands.command()
     async def rules(self, ctx):
-        channel = self.bot.get_channel(722220184814747678)
+        channel = self.bot.get_channel(CH_TXT_TESTING)
         await channel.send(
             "**REGOLAMENTO**\n Le regole sono divise in 3 sezioni; le prime due descrivono le regole generali che tutti gli utenti all’interno del server devono seguire, mentre la terza parte regolamenta i comportamenti che ogni membro del clan deve mantenere.")
         embed = Embed(title="Sezione 1 - Moralità del Clan",

@@ -1,6 +1,7 @@
 import requests
-from discord.utils import get
 from discord.ext.commands.context import Context
+from discord.utils import get
+
 from constants import AuthorizationLevelEnum, authorizationLevel
 
 
@@ -29,7 +30,7 @@ def check_data(url: str) -> dict | None:
 async def check_role(ctx: Context, level: AuthorizationLevelEnum) -> bool:
     """
     Check if the sender has the correct role.
-    It's use for authorization member to trigger bot's command.
+    It's use for authorization member to trigger bots command.
 
     Args:
         ctx: it's the context.

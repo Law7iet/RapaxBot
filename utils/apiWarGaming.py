@@ -7,12 +7,13 @@ class ApiWarGaming:
     def __init__(self):
         self.key = data['APPLICATION_ID']
         self.url_api_root = 'https://api.worldofwarships.eu/wows/'
-        self.urlPlayerPersonalData = self.url_api_root + 'account/info/?application_id=' + self.key + '&account_id='
-        self.urlClans = self.url_api_root + 'clans/list/?application_id=' + self.key + '&search='
-        self.urlClanDetails = self.url_api_root + 'clans/info/?application_id=' + self.key + '&clan_id='
-        self.urlShips = self.url_api_root + 'encyclopedia/ships/?application_id=' + self.key + '&fields=name%2C+tier%2C+ship_id%2C+is_special%2C+is_premium%2C+type%2C+nation&page_no='
-        self.urlPlayerShips = self.url_api_root + 'ships/stats/?application_id=' + self.key + '&fields=ship_id&account_id='
-        self.urlPlayerClanData = self.url_api_root + 'clans/accountinfo/?application_id=' + self.key + '&account_id='
+        self.url_players = self.url_api_root + 'account/list/?application_id=' + self.key + '&search='
+        self.url_player_personal_data = self.url_api_root + 'account/info/?application_id=' + self.key + '&account_id='
+        self.url_clans = self.url_api_root + 'clans/list/?application_id=' + self.key + '&search='
+        self.url_clan_details = self.url_api_root + 'clans/info/?application_id=' + self.key + '&clan_id='
+        self.url_ships = self.url_api_root + 'encyclopedia/ships/?application_id=' + self.key + '&fields=name%2C+tier%2C+ship_id%2C+is_special%2C+is_premium%2C+type%2C+nation&page_no='
+        self.url_player_ships = self.url_api_root + 'ships/stats/?application_id=' + self.key + '&fields=ship_id&account_id='
+        self.url_player_clan_data = self.url_api_root + 'clans/accountinfo/?application_id=' + self.key + '&account_id='
 
     def get_ships(self) -> list:
         """
@@ -24,7 +25,7 @@ class ApiWarGaming:
         ships = {}
         page = 1
         while True:
-            response_ships = check_data(self.urlShips + str(page))
+            response_ships = check_data(self.url_ships + str(page))
             if response_ships is None:
                 return []
 
@@ -35,23 +36,23 @@ class ApiWarGaming:
 
         return ships.items()
 
-    def get_clan_members(self, clanId: int) -> list:
+    def get_clan_members(self, clan_id: int) -> list:
         """
         Returns the list of the player's ID of the clan's ID passed in input.
 
         Args:
-            clanId: the clan ID.
+            clan_id: the clan ID.
 
         Returns:
             the players' ID.
         """
-        clanMembers = []
-        response_clan_details = check_data(self.urlClanDetails + str(clanId))
+        clan_members = []
+        response_clan_details = check_data(self.url_clan_details + str(clan_id))
         if response_clan_details is None:
-            return clanMembers
-        for id in response_clan_details['data'][str(clanId)]['members_ids']:
-            clanMembers.append(id)
-        return clanMembers
+            return clan_members
+        for player_id in response_clan_details['data'][str(clan_id)]['members_ids']:
+            clan_members.append(player_id)
+        return clan_members
 
     def get_player_ships(self, playerId: int) -> list:
         """
@@ -64,7 +65,7 @@ class ApiWarGaming:
             the players' ships.
         """
         ships = []
-        response_member_data = check_data(self.urlPlayerShips + str(playerId))
+        response_member_data = check_data(self.url_player_ships + str(playerId))
         if response_member_data is None:
             return ships
         for ship in response_member_data['data'][str(playerId)]:
@@ -81,7 +82,7 @@ class ApiWarGaming:
         Returns:
             it contains the id and nickname. If the input nickname doesn't match with any player, it returns `None`.
         """
-        url = self.urlPlayers + nickname
+        url = self.url_players + nickname
         # api call and check if the response is ok
         response = check_data(url)
         try:
@@ -101,7 +102,7 @@ class ApiWarGaming:
         Returns:
             it contains the id and nickname. If the input nickname doesn't match with any player, it returns `None`.
         """
-        url = self.urlPlayerPersonalData + player_id
+        url = self.url_player_personal_data + player_id
         # api call and check if the response is ok
         response = check_data(url)
         try:
@@ -121,7 +122,7 @@ class ApiWarGaming:
         Returns:
             it contains the clan ID. If the player has not a clan, it returns `None`.
         """
-        url = self.urlPlayerClanData + str(clan_id)
+        url = self.url_player_clan_data + str(clan_id)
         response = check_data(url)
         try:
             response_data = response['data']
@@ -140,7 +141,7 @@ class ApiWarGaming:
         Returns:
             it contains the clan name and clan tag. If the ID isn't valid, it returns `None`.
         """
-        url = self.urlClanDetails + str(clan_id)
+        url = self.url_clan_details + str(clan_id)
         response = check_data(url)
         try:
             response_data = response['data']

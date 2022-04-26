@@ -1,8 +1,10 @@
 import asyncio
-from discord import Embed, Member
-from discord.ext import commands
 from random import choice
 from random import randrange
+
+from discord import Embed, Member
+from discord.ext import commands
+
 from utils.constants import *
 from utils.functions import *
 
@@ -17,10 +19,10 @@ class Entertainment(commands.Cog):
         A simple command that responses with "Pong!".
 
         Args:
-            `ctx` (commands.context.Context): it's the context.
+            ctx: it's the context.
         
         Returns:
-            `None`
+            None
         """
         await ctx.send('Pong!')
 
@@ -32,12 +34,12 @@ class Entertainment(commands.Cog):
         executive officer.
 
         Args:
-            `ctx` (commands.context.Context): it's the context.
-            `channelId` (int): the channel's ID where the message was sent.
-            `messageId` (int): the message ID where you want to add the reactions.
+            ctx: it's the context.
+            channel_id: the channel's ID where the message was sent.
+            message_id: the message ID where you want to add the reactions.
 
         Returns:
-            `None`
+            None
         """
         author = ctx.message.author
         guild = ctx.guild
@@ -51,17 +53,17 @@ class Entertainment(commands.Cog):
             await msg.add_reaction(element)
 
     @commands.command()
-    async def dice(self, ctx: commands.context.Context, *parameters: tuple) -> None:
+    async def dice(self, ctx: commands.context.Context, *parameters: str) -> None:
         """
         Throws a die.
         By default, the dice has 6 sides, but you can change the number of sides writing the number than input.
 
         Args:
-            `ctx` (commands.context.Context): it's the context.
-            `parameters` (tuple): it's an optional parameter; it is the number of sides.
+            ctx: it's the context.
+            parameters: it's an optional parameter; it is the number of sides.
 
         Returns:
-            `None`
+            None
         """
         if not (await check_role(ctx, AuthorizationLevelEnum.OSPITI)):
             return None
@@ -89,10 +91,10 @@ class Entertainment(commands.Cog):
         Throws a coin.
 
         Args:
-            `ctx` (commands.context.Context): it's the context.
+            ctx: it's the context.
 
         Returns:
-            `None`
+            None
         """
         if not (await check_role(ctx, AuthorizationLevelEnum.OSPITI)):
             return None
@@ -107,13 +109,13 @@ class Entertainment(commands.Cog):
         After `time` seconds, it restore che member roles.
 
         Args:
-            `ctx` (commands.context.Context): it's the context.
-            `member` (Member): the member whose go to the prison.
-            `time` (int): the time in second.
-            `message` (str): the motivation.
+            ctx: it's the context.
+            member: the member whose go to the prison.
+            time: the time in second.
+            message: the motivation.
 
         Returns:
-            `None`
+            None
         """
         if not (await check_role(ctx, AuthorizationLevelEnum.UFFICIALE)):
             return None
@@ -164,11 +166,11 @@ class Entertainment(commands.Cog):
         After 5 minutes, it removes the role.
 
         Args:
-            `ctx` (commands.context.Context): it's the context.
-            `member` (Member): the member whose became 'torpedo-friend'.
+            ctx: it's the context.
+            member: the member whose became 'torpedo-friend'.
 
         Returns:
-            `None`
+            None
         """
         if not (await check_role(ctx, AuthorizationLevelEnum.MEMBRO_DEL_CLAN)):
             return None
