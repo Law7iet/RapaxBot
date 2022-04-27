@@ -14,7 +14,7 @@ class Moderation(commands.Cog):
         self.bot = bot
         self.apiWargaming = ApiWarGaming()
 
-    async def presenze(self, ctx: commands.context.Context, event_type: WowsEventEnum, message: str) -> None:
+    async def presenze(self, ctx: commands.context.Context, event_type: WowsEventEnum, message: str, role: int) -> None:
         """
         Generate the participation message for Clan Battles, Clan Brawl, Training or other events.
         Each event is associated with the `WowsEventEnum` enum and each event has a own reaction.
@@ -24,18 +24,20 @@ class Moderation(commands.Cog):
             ctx: it's the context.
             event_type: type of the event.
             message: the message which will be displayed in the embed as description.
+            role: the role to ping.
 
         Returns:
             None
         """
         if not (await check_role(ctx, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
             return None
-        channel = self.bot.get_channel(CH_TXT_CALENDARIO)
-        ping = "<@&" + str(MEMBRO_DEL_CLAN) + ">"
         # TEST MODE
         if DEBUG:
             channel = self.bot.get_channel(CH_TXT_TESTING)
             ping = "<@&" + str(OSPITI) + ">"
+        else:
+            channel = self.bot.get_channel(CH_TXT_CALENDARIO)
+            ping = "<@&" + str(role) + ">"
 
         title = "Presenze " + wowsEvent[int(event_type)]
         if event_type == WowsEventEnum.CLAN_BATTLE:
@@ -56,7 +58,7 @@ class Moderation(commands.Cog):
             icon = 'https://cdn.discordapp.com/attachments/675275973918195712/944988546811461653/rapax.png'
         else:
             return None
-        embed = Embed(title=title, description=message + "\n\n\n" + "\n".join(keys), color=0xffd519)
+        embed = Embed(title=title, description=ping + "\n" + message + "\n\n\n" + "\n".join(keys), color=0xffd519)
         embed.set_author(name="RapaxBot")
         embed.set_thumbnail(url=icon)
 
@@ -170,7 +172,8 @@ class Moderation(commands.Cog):
         Returns:
             None
         """
-        await self.presenze(ctx, WowsEventEnum.CLAN_BATTLE, message)
+        await self.presenze(ctx, WowsEventEnum.CLAN_BATTLE, message, CB_ALPHA)
+        await self.presenze(ctx, WowsEventEnum.CLAN_BATTLE, message, CB_BRAVO)
 
     @commands.command()
     async def cb(self, ctx: commands.context.Context, *, message: str) -> None:
@@ -184,7 +187,8 @@ class Moderation(commands.Cog):
         Returns:
             None
         """
-        await self.presenze(ctx, WowsEventEnum.CLAN_BRAWL, message)
+        await self.presenze(ctx, WowsEventEnum.CLAN_BRAWL, message, CB_ALPHA)
+        await self.presenze(ctx, WowsEventEnum.CLAN_BATTLE, message, CB_BRAVO)
 
     @commands.command()
     async def training(self, ctx: commands.context.Context, *, message: str) -> None:
@@ -198,7 +202,7 @@ class Moderation(commands.Cog):
         Returns:
             None
         """
-        await self.presenze(ctx, WowsEventEnum.TRAINING, message)
+        await self.presenze(ctx, WowsEventEnum.TRAINING, message, MEMBRO_DEL_CLAN)
 
     @commands.command()
     async def event(self, ctx: commands.context.Context, *, message: str) -> None:
@@ -212,7 +216,7 @@ class Moderation(commands.Cog):
         Returns:
             None
         """
-        await self.presenze(ctx, WowsEventEnum.OTHER, message)
+        await self.presenze(ctx, WowsEventEnum.OTHER, message, MEMBRO_DEL_CLAN)
 
     @commands.command()
     async def nickname(self, ctx: commands.context.Context) -> None:
