@@ -13,8 +13,8 @@ for i in range(1, 12):
     with open(fileName, mode='w') as csv_file:
         # Setup header
         header = ['nickname']
-        for ship_type in clanShips.shipsByTierAndType[str(i)]:
-            for ship in clanShips.shipsByTierAndType[str(i)][ship_type]:
+        for ship_type in clanShips.ships_by_tier_and_type[str(i)]:
+            for ship in clanShips.ships_by_tier_and_type[str(i)][ship_type]:
                 header.append(ship['name'])
         writer = csv.writer(csv_file, delimiter=',')
         writer.writerow(header)
