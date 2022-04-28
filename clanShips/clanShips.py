@@ -224,7 +224,7 @@ class ClanShips:
 
         return player_table
 
-    def getPlayersShips(self, clanId: int) -> dict:
+    def get_players_ships(self, clanId: int) -> dict:
         """
         Generate a dict where's stored the ships played by each member of the clan passed by ID.
         The key is the player nickname, and the value is a dictionary divided by tier and type, where the final value is a list of a specific tier and specific type.
