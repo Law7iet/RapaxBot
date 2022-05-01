@@ -1,59 +1,124 @@
 import asyncio
 from random import choice
-from random import randrange
+from random import randrange, random
 
-from discord import Embed, Member
-from discord.ext import commands
+from disnake import ApplicationCommandInteraction, Embed, Member
+from disnake.ext import commands
 
 from utils.constants import *
 from utils.functions import *
+
+VoteOptions = commands.option_enum({
+    "Default": "Default",
+    "Reddit": "Reddit"
+})
 
 
 class Entertainment(commands.Cog):
     def __init__(self, bot: commands.Cog):
         self.bot = bot
 
-    @commands.command()
-    async def ping(self, ctx: commands.context.Context) -> None:
+    @commands.slash_command(
+        name="ping",
+        description="Ping pong!"
+    )
+    async def ping(self, inter: ApplicationCommandInteraction) -> None:
         """
         A simple command that responses with "Pong!".
 
         Args:
-            ctx: it's the context.
+            inter: it's the application command interation (context).
         
         Returns:
             None
         """
-        await ctx.send('Pong!')
+        await inter.response.send_message("Pong!")
 
-    @commands.command()
-    async def vote(self, ctx: commands.context.Context, channel_id: int, message_id: int) -> None:
+    @commands.slash_command(
+        name="Vote",
+        description="Manda un messaggio con le reazioni per poter votare il messaggio."
+    )
+    async def vote(self, inter: ApplicationCommandInteraction, tipo: VoteOptions, messaggio: str) -> None:
         """
         Add 3 reactions to the message; the reactions are \U00002705, \U0000274C, and \U00002753.
         If the message's author is the person who called this command, it adds the emojis if the caller is at least an
         executive officer.
 
         Args:
-            ctx: it's the context.
-            channel_id: the channel's ID where the message was sent.
-            message_id: the message ID where you want to add the reactions.
+            messaggio: the message that you want to add the reactions.
+            tipo: the type of the reactions.
+            inter:
 
         Returns:
             None
         """
-        author = ctx.message.author
-        guild = ctx.guild
-        channel = guild.get_channel(channel_id)
-        msg = await channel.fetch_message(message_id)
-        if msg.author != author:
-            if not (await check_role(ctx, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
-                return None
-        await ctx.message.delete()
-        for element in voteEmoji:
-            await msg.add_reaction(element)
+        await inter.response.send_message(messaggio)
+        message = await inter.original_message()
+        match tipo:
+            case "Default":
+                emojis = ["\U00002705", "\U0000274C"]
+            case "Reddit":
+                emojis = ["<:upvote:963800988211355648>", "<:downvote:963801020725612584>"]
+            case _:
+                return
+        for emoji in emojis:
+            await message.add_reaction(emoji)
 
-    @commands.command()
-    async def dice(self, ctx: commands.context.Context, *parameters: str) -> None:
+    @commands.slash_command(
+        name="vote_message",
+        description="Aggiunge al messaggio passato per ID le reazioni per votare."
+    )
+    async def vote_message(self, inter: ApplicationCommandInteraction, tipo: VoteOptions, id_canale: str, id_messaggio: str) -> None:
+        """
+        Add 3 reactions to the message; the reactions are \U00002705, \U0000274C, and \U00002753.
+        If the message's author is the person who called this command, it adds the emojis if the caller is at least an
+        executive officer.
+
+        Args:
+            messaggio: the message that you want to add the reactions.
+            tipo: the type of the reactions.
+            inter:
+
+        Returns:
+            None
+        """
+        author = inter.author
+        guild = inter.guild
+        try:
+            channel = guild.get_channel(int(id_canale))
+            msg = await channel.fetch_message(int(id_messaggio))
+        except:
+            await inter.response.send_message("Messaggio/canale non trovato.")
+            await asyncio.sleep(5)
+            message = await inter.original_message()
+            await message.delete()
+            return None
+        if msg.author != author:
+            if not (await check_role(inter, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
+                await inter.response.send_message("Non hai i permessi.")
+                await asyncio.sleep(5)
+                message = await inter.original_message()
+                await message.delete()
+                return None
+        match tipo:
+            case "Default":
+                emojis = ["\U00002705", "\U0000274C"]
+            case "Reddit":
+                emojis = ["<:upvote:963800988211355648>", "<:downvote:963801020725612584>"]
+            case _:
+                return
+        for emoji in emojis:
+            await msg.add_reaction(emoji)
+        await inter.response.send_message("Fatto!")
+        await asyncio.sleep(5)
+        message = await inter.original_message()
+        await message.delete()
+
+    @commands.slash_command(
+        name="dice",
+        description="Tira un dado con n facce. Di default n è 6"
+    )
+    async def dice(self, inter: ApplicationCommandInteraction, n: int = 6) -> None:
         """
         Throws a die.
         By default, the dice has 6 sides, but you can change the number of sides writing the number than input.
@@ -65,28 +130,19 @@ class Entertainment(commands.Cog):
         Returns:
             None
         """
-        if not (await check_role(ctx, AuthorizationLevelEnum.OSPITI)):
+        if not (await check_role(inter, AuthorizationLevelEnum.OSPITI)):
+            await inter.response.send_message("Non hai i permessi.")
+            await asyncio.sleep(5)
+            message = await inter.original_message()
+            await message.delete()
             return None
-        number = -1
-        if len(parameters) == 0:
-            number = 6
-        elif len(parameters) == 1:
-            try:
-                number = int(parameters[0])
-            except:
-                number = -1
-        if number > 0:
-            await ctx.send(randrange(number) + 1)
-        else:
-            embed = Embed(title='Comando non corretto', description='Il comando può essere:', color=0xffd519)
-            embed.set_author(name='RapaxBot', icon_url='https://cdn.discordapp.com/attachments/675275973918195712/924566156407341076/Logo_RAPAX_Cerchio.png')
-            embed.add_field(name='`>dice`', value='Tira un dado a 6 facce.', inline=False)
-            embed.add_field(name='`>dice x`', value='Tira un dado a `x` facce; `x` è un numero intero positivo.',
-                            inline=True)
-            await ctx.send(embed=embed)
+        await inter.response.send_message("Risultato del dado a " + str(n) + " facce: **" + str(randrange(n) + 1) + "**")
 
-    @commands.command()
-    async def coin(self, ctx: commands.context.Context) -> None:
+    @commands.slash_command(
+        name="coin",
+        description="Lancia una moneta. Potrebbe cadere in piedi"
+    )
+    async def coin(self, inter: ApplicationCommandInteraction) -> None:
         """
         Throws a coin.
 
@@ -96,10 +152,20 @@ class Entertainment(commands.Cog):
         Returns:
             None
         """
-        if not (await check_role(ctx, AuthorizationLevelEnum.OSPITI)):
+        if not (await check_role(inter, AuthorizationLevelEnum.OSPITI)):
+            await inter.response.send_message("Non hai i permessi.")
+            await asyncio.sleep(5)
+            message = await inter.original_message()
+            await message.delete()
             return None
-        moneta = ['Testa', 'Croce']
-        await ctx.send(choice(moneta))
+        x = random()
+        if x > 0.5:
+            moneta = "Testa"
+        elif x < 0.5:
+            moneta = "Croce"
+        else:
+            await inter.response.send_message("@everyone la moneta è caduta in piedi!")
+        await inter.response.send_message("È uscito " + moneta)
 
     @commands.command()
     async def prison(self, ctx: commands.context.Context, member: Member, time: int, *, message: str) -> None:
