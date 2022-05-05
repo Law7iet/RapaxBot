@@ -1,6 +1,6 @@
 from enum import IntEnum
 
-DEBUG = True
+DEBUG = False
 
 # Guild's ID
 RAPAX_GUILD = 680755400655765515
