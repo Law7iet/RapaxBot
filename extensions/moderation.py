@@ -1,64 +1,53 @@
 import re
 
-from discord import Embed, Emoji
-from discord.ext import commands
+from disnake import Embed, Role, TextChannel, errors
+from disnake.ext import commands
 
 from utils.apiWarGaming import ApiWarGaming
 from utils.constants import *
 from utils.functions import *
 
+from utils.modal import Modal
 
-class Moderation(commands.Cog):
+EventOptions = commands.option_enum({
+    "Clan Battle": "Clan Battle",
+    "Allenamento": "allenamento"
+})
 
-    def __init__(self, bot):
+
+class Moderation(
+    commands.Cog
+):
+    def __init__(
+            self,
+            bot: commands.Cog
+    ):
         self.bot = bot
         self.apiWargaming = ApiWarGaming()
 
-    async def presenze(self, ctx: commands.context.Context, event_type: WowsEventEnum, message: str, role: int) -> None:
-        """
-        Generate the participation message for Clan Battles, Clan Brawl, Training or other events.
-        Each event is associated with the `WowsEventEnum` enum and each event has a own reaction.
-        The keys are separated from the message by 3 new lines; using 3 new lines in a row you won't be able to edit the description.
-
-        Args:
-            ctx: it's the context.
-            event_type: type of the event.
-            message: the message which will be displayed in the embed as description.
-            role: the role to ping.
-
-        Returns:
-            None
-        """
-        if not (await check_role(ctx, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
-            return None
+    async def presenze(
+            self,
+            inter: ApplicationCommandInteraction,
+            evento: EventOptions,
+            ruolo: Role,
+            messaggio: str,
+            keys: list[str],
+            reactions: list[str],
+            icon: str
+    ):
+        if not (await check_role(inter, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
+            await send_response_and_clear(inter, False, "Non hai i permessi.")
+            return
         # TEST MODE
         if DEBUG:
             channel = self.bot.get_channel(CH_TXT_TESTING)
             ping = "<@&" + str(OSPITI) + ">"
         else:
             channel = self.bot.get_channel(CH_TXT_CALENDARIO)
-            ping = "<@&" + str(role) + ">"
+            ping = "<@&" + str(ruolo.id) + ">"
 
-        title = "Presenze " + wowsEvent[int(event_type)]
-        if event_type == WowsEventEnum.CLAN_BATTLE:
-            keys = CBKeys
-            reactions = CBEmoji
-            icon = "https://cdn.discordapp.com/attachments/675275973918195712/944874666164637736/clanBattle.png"
-        elif event_type == WowsEventEnum.CLAN_BRAWL:
-            keys = CBKeys
-            reactions = CBEmoji
-            icon = "https://cdn.discordapp.com/attachments/675275973918195712/944874666391142500/clanBrawl.png"
-        elif event_type == WowsEventEnum.TRAINING:
-            keys = eventKeys
-            reactions = eventEmoji
-            icon = "https://cdn.discordapp.com/attachments/675275973918195712/944964438652506192/training.png"
-        elif event_type == WowsEventEnum.OTHER:
-            keys = voteKeys
-            reactions = voteEmoji
-            icon = 'https://cdn.discordapp.com/attachments/675275973918195712/944988546811461653/rapax.png'
-        else:
-            return None
-        embed = Embed(title=title, description=ping + "\n" + message + "\n\n\n" + "\n".join(keys), color=0xffd519)
+        title = "Presenze " + evento
+        embed = Embed(title=title, description=ping + "\n" + messaggio + "\n\n\n" + "\n".join(keys), color=0xffd519)
         embed.set_author(name="RapaxBot")
         embed.set_thumbnail(url=icon)
 
@@ -67,174 +56,302 @@ class Moderation(commands.Cog):
         for element in reactions:
             await msg.add_reaction(element)
 
-    @commands.command()
-    async def edit_embed(self, ctx: commands.context.Context, channel_id: int, message_id: int, *,
-                         newDescription: str) -> None:
+        await send_response_and_clear(inter, True, "Fatto!")
+
+    @commands.slash_command(
+        name="scrivi"
+    )
+    async def scrivi(
+            self,
+            inter: ApplicationCommandInteraction
+    ) -> None:
+        pass
+
+    @scrivi.sub_command(
+        name="messaggio",
+        description="Il bot scrive un messaggio per te."
+    )
+    async def messaggio(
+            self,
+            inter: ApplicationCommandInteraction,
+            canale: TextChannel,
+            ruolo: Role
+    ) -> None:
         """
-        Edit the description of an embed message.
-        The old description has one '3 new lines' to separate the own message and the keys.
+        Write an embed message using the bot profile. The message must tag a role and it must have a text. The title is
+        optional
 
         Args:
-            ctx: it's the context.
-            channel_id: the channel's ID where the message was sent.
-            message_id: the message ID.
-            newDescription: the new description of the embed.
+            inter: the application command interation (context).
+            canale: the channel where you want to send the message.
+            ruolo: the role who will be pinged.
 
         Returns:
             None
         """
-        if not (await check_role(ctx, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
-            return None
-        guild = ctx.guild
-        channel = guild.get_channel(channel_id)
-        message = await channel.fetch_message(message_id)
-        try:
-            embed = message.embeds[0]
-            old_description = embed.description.split('\n\n\n')
-            old_description[0] = newDescription
-            description = old_description[0] + '\n\n\n' + old_description[1]
-            embed.description = description
-            await message.edit(embed=embed)
-        except:
-            return None
+        if not (await check_role(inter, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
+            await send_response_and_clear(inter, False, "Non hai i permessi.")
+            return
+        await inter.response.send_modal(modal=Modal(ruolo, canale))
 
-    @commands.command()
-    async def write(self, ctx: commands.context.Context, channelId: int, *, message) -> None:
+    @commands.slash_command(
+        name="modifica"
+    )
+    async def modifica(
+            self,
+            inter: ApplicationCommandInteraction
+    ) -> None:
+        pass
+
+    @modifica.sub_command(
+        name="messaggio",
+        description="Modifica un messaggio-embed del bot."
+    )
+    async def messaggio(
+            self,
+            inter: ApplicationCommandInteraction,
+            canale: TextChannel,
+            id_messaggio: str,
+            ruolo: Role
+    ) -> None:
         """
-        Write a message using the bot profile.
+        Edit the embed message. If in the modal the fields are empty, it doesn't edit the empty field.
 
         Args:
-            ctx: it's the context.
-            channelId: the channel's ID where you want to write.
-            message: the message you want to write.
+            inter: the application command interation (context).
+            canale: the channel where you want to send the message.
+            id_messaggio: the message's id.
+            ruolo: the role who will be pinged.
 
         Returns:
             None
         """
-        if not (await check_role(ctx, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
-            return None
-        guild = ctx.guild
-        channel = guild.get_channel(channelId)
-        await channel.send(message)
+        if not (await check_role(inter, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
+            await send_response_and_clear(inter, False, "Non hai i permessi.")
+            return
+        await inter.response.send_modal(modal=Modal(ruolo, canale, id_messaggio))
 
-    @commands.command()
-    async def edit(self, ctx: commands.context.Context, channel_id: int, message_id: int, *, new_message: str) -> None:
-        """
-        Edit a message sent by the bot.
+    @commands.slash_command(
+        name="aggiungi"
+    )
+    async def aggiungi(
+            self,
+            inter: ApplicationCommandInteraction
+    ) -> None:
+        pass
 
-        Args:
-            ctx: it's the context.
-            channel_id: the channel's ID where the message was sent.
-            message_id: the message ID.
-            new_message: the new message.
-
-        Returns:
-            None
-        """
-        if not (await check_role(ctx, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
-            return None
-        guild = ctx.guild
-        channel = guild.get_channel(channel_id)
-        message = await channel.fetch_message(message_id)
-        await message.edit(content=new_message)
-
-    @commands.command()
-    async def add_emoji(self, ctx: commands.context.Context, channel_id: int, message_id: int, emoji: Emoji) -> None:
+    @aggiungi.sub_command(
+        name="reazione",
+        description="Aggiunge una reazione al messaggio indicato."
+    )
+    async def reazione(
+            self,
+            inter: ApplicationCommandInteraction,
+            canale: TextChannel,
+            id_messaggio: str,
+            emoji: str
+    ) -> None:
         """
         Add a reaction to a message. It works only for default's emoji and server's emoji.
 
         Args:
-            ctx: it's the context.
-            channel_id: the channel's ID where the message was sent.
-            message_id: the message ID which you want to add a reaction.
-            emoji (Emoji): the emoji you want to use as reaction.
+            inter: the application command interation (context).
+            canale: the channel where you want to send the message.
+            id_messaggio: the message's id.
+            emoji: the emoji you want to use as reaction.
 
         Returns:
             None
         """
-        if not (await check_role(ctx, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
-            return None
-        guild = ctx.guild
-        channel = guild.get_channel(channel_id)
-        message = await channel.fetch_message(message_id)
-        await ctx.message.delete()
-        await message.add_reaction(emoji)
+        if not (await check_role(inter, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
+            await send_response_and_clear(inter, False, "Non hai i permessi.")
+            return
+        try:
+            message = await canale.fetch_message(int(id_messaggio))
+            await message.add_reaction(emoji)
+        except ValueError:
+            await send_response_and_clear(inter, False, "ID del messaggio non corretto.")
+            return
+        except errors.HTTPException as error:
+            match error.code:
+                case 10008:
+                    await send_response_and_clear(inter, False, "Messaggio non trovato.")
+                    return
+                case 10014:
+                    await send_response_and_clear(inter, False, "Emoji non valido.")
+                    return
+                case _:
+                    await send_response_and_clear(inter, False, "Errore generico.\n" + str(error))
+                    return
+        await send_response_and_clear(inter, False, "Fatto!")
 
-    @commands.command()
-    async def CB(self, ctx: commands.context.Context, *, message: str) -> None:
+    @commands.slash_command(
+        name="presenza"
+    )
+    async def presenza(
+            self,
+            inter: ApplicationCommandInteraction
+    ) -> None:
+        pass
+
+    @presenza.sub_command(
+        name="giornaliera",
+        description="Manda le presenze per un evento"
+    )
+    async def giornaliera(
+            self,
+            inter: ApplicationCommandInteraction,
+            evento: EventOptions,
+            ruolo: Role,
+            messaggio: str = ""
+    ) -> None:
         """
-        Sent an embed that requests the partecipation of the Clan Battle.
+        Generate the participation message for a specific Clan Battles or Training day.
 
         Args:
-            ctx: it's the context.
-            message: it's the message that compares in the embed as description.
+            inter: the application command interation (context).
+            evento: the event.
+            ruolo: the role who will be pinged.
+            messaggio: the message.
 
         Returns:
             None
         """
-        await self.presenze(ctx, WowsEventEnum.CLAN_BATTLE, message, CB_ALPHA)
-        await self.presenze(ctx, WowsEventEnum.CLAN_BATTLE, message, CB_BRAVO)
+        await inter.response.defer()
+        match evento:
+            case "Clan Battle":
+                keys = [
+                    "- \U00000031\U000020E3 19:00-21:00",
+                    "- \U00000032\U000020E3 21:00-23:00",
+                    "- \U0001F557 Arrivo tardi",
+                    "- \U0000274C Non disponibile",
+                    "- \U00002753 Forse"
+                ]
+                reactions = [
+                    "\U00000031\U000020E3",
+                    "\U00000032\U000020E3",
+                    "\U0001F557",
+                    "\U0000274C",
+                    "\U00002753"
+                ]
+                icon = "https://cdn.discordapp.com/attachments/675275973918195712/951066454596419604/clanBattle.png"
+            case "allenamento":
+                keys = [
+                    "- \U00002705 Presente",
+                    "- \U0001F557 Arrivo tardi",
+                    "- \U0000274C Assente",
+                    "- \U00002753 Forse"
+                ]
+                reactions = [
+                    "\U00002705",
+                    "\U0001F557",
+                    "\U0000274C",
+                    "\U00002753"
+                ]
+                icon = "https://cdn.discordapp.com/attachments/675275973918195712/944964438652506192/training.png"
+            case _:
+                return
+        await self.presenze(inter, evento, ruolo, messaggio, keys, reactions, icon)
 
-    @commands.command()
-    async def cb(self, ctx: commands.context.Context, *, message: str) -> None:
+    @presenza.sub_command(
+        name="settimanale",
+        description="Richiede le presenze dei giocatori per una settimana."
+    )
+    async def settimanale(
+            self,
+            inter: ApplicationCommandInteraction,
+            evento: EventOptions,
+            ruolo: Role,
+            messaggio: str = ""
+    ) -> None:
         """
-        Sent an embed that requests the partecipation of the Clan Brawl.
+        Generate the participation message for the Clan Battles or Training.
 
         Args:
-            ctx: it's the context.
-            message: it's the message that compares in the embed as description.
-        
+            inter: the application command interation (context).
+            evento: the event.
+            ruolo: the role who will be pinged.
+            messaggio: the message.
+
         Returns:
             None
         """
-        await self.presenze(ctx, WowsEventEnum.CLAN_BRAWL, message, CB_ALPHA)
-        await self.presenze(ctx, WowsEventEnum.CLAN_BATTLE, message, CB_BRAVO)
+        await inter.response.defer()
+        match evento:
+            case "Clan Battle":
+                keys = [
+                    "Mercoledì",
+                    "- :one: 19:00-21:00",
+                    "- :two: 21:00-23:00",
+                    "Giovedì",
+                    "- :three: 19:00-21:00",
+                    "- :four: 21:00-23:00",
+                    "Sabato",
+                    "- :five: 19:00-21:00",
+                    "- :six: 21:00-23:00",
+                    "Domenica",
+                    "- :seven: 19:00-21:00",
+                    "- :eight: 21:00-23:00",
+                ]
+                reactions = [
+                    "\U00000031\U000020E3",
+                    "\U00000032\U000020E3",
+                    "\U00000033\U000020E3",
+                    "\U00000034\U000020E3",
+                    "\U00000035\U000020E3",
+                    "\U00000036\U000020E3",
+                    "\U00000037\U000020E3",
+                    "\U00000038\U000020E3"
+                ]
+                icon = "https://cdn.discordapp.com/attachments/675275973918195712/951066454596419604/clanBattle.png"
+            case "allenamento":
+                keys = [
+                    "- :one: lunedì",
+                    "- :two: martedì",
+                    "- :three: mercoledì",
+                    "- :four: giovedì",
+                    "- :five: venerdì",
+                    "- :six: sabato",
+                    "- :seven: domenica"
+                ]
+                reactions = [
+                    "\U00000031\U000020E3",
+                    "\U00000032\U000020E3",
+                    "\U00000033\U000020E3",
+                    "\U00000034\U000020E3",
+                    "\U00000035\U000020E3",
+                    "\U00000036\U000020E3",
+                    "\U00000037\U000020E3"
+                ]
+                icon = "https://cdn.discordapp.com/attachments/675275973918195712/944964438652506192/training.png"
+            case _:
+                return
+        await self.presenze(inter, evento, ruolo, messaggio, keys, reactions, icon)
 
-    @commands.command()
-    async def training(self, ctx: commands.context.Context, *, message: str) -> None:
+    @commands.slash_command(
+        name="nickname"
+    )
+    async def nickname(
+            self,
+            inter: ApplicationCommandInteraction
+    ) -> None:
         """
-        Sent an embed that requests the participation of the training.
+        Check the server's guests' nickname and role. The bot change their nickname with their game nickname, using
+        their current nickname. It adds the clans tag at the beginning. Each clan has a role, if not, it creates it and
+        add it to the member.
 
         Args:
-            ctx: it's the context.
-            message: it's the message that compares in the embed as description.
-        
-        Returns:
-            None
-        """
-        await self.presenze(ctx, WowsEventEnum.TRAINING, message, MEMBRO_DEL_CLAN)
-
-    @commands.command()
-    async def event(self, ctx: commands.context.Context, *, message: str) -> None:
-        """
-        Sent an embed that requests the participation of a event.
-
-        Args:
-            ctx: it's the context.
-            message: it's the message that compares in the embed as description.
+            inter: the application command interation (context).
 
         Returns:
             None
         """
-        await self.presenze(ctx, WowsEventEnum.OTHER, message, MEMBRO_DEL_CLAN)
-
-    @commands.command()
-    async def nickname(self, ctx: commands.context.Context) -> None:
-        """
-        Check the server's guests' nickname and role.
-        The bot change their nickname with their game nickname, using their current nickname.
-        It adds the clans tag at the beginning.
-        Each clan has a role, if not, it creates it and add it to the member.
-
-        Args:
-            ctx: it's the context.
-        
-        Returns:
-            None
-        """
-        if not (await check_role(ctx, AuthorizationLevelEnum.AMMINISTRATORE)):
-            return None
-        guild = ctx.guild
+        await inter.response.defer()
+        if not (await check_role(inter, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
+            await send_response_and_clear(inter, False, "Non hai i permessi.")
+            return
+        guild = inter.guild
+        testing_channel = guild.get_channel(CH_TXT_TESTING)
         members = guild.members
         # For each member of the server
         for member in members:
@@ -257,7 +374,7 @@ class Moderation(commands.Cog):
                     # search nick with WoWs API
                     player_info = self.apiWargaming.get_player_by_nick(user_current_nickname)
                     if player_info is None:
-                        await ctx.send("\U000026A0 Il membro `" + member.display_name + "` non è stato trovato.")
+                        await testing_channel.send("\U000026A0 Il membro `" + member.display_name + "` non è stato trovato.")
                         continue
                     # search tag with WoWs API
                     clan_id = self.apiWargaming.get_clan_by_player_id(player_info[0])
@@ -274,11 +391,11 @@ class Moderation(commands.Cog):
                         clan_info = self.apiWargaming.get_clan_name_by_id(clan_id)
                         if get(guild.roles, name=clan_info[0]) is None:
                             await guild.create_role(name=clan_info[0], hoist=True, reason='Tag del Clan')
-                            await ctx.send("\U0001F464 nuovo tag: `" + clan_info[0] + "`")
+                            await testing_channel.send("\U0001F464 nuovo tag: `" + clan_info[0] + "`")
                         # Change user tag
                         if clan_info[1] != user_current_tag:
                             user_current_tag = clan_info[1]
-                            await ctx.send(
+                            await testing_channel.send(
                                 "\U00002705 `" + member.display_name + "` cambiato tag `" + clan_info[1] + "`")
                         # Change user role
                         # TO-DO: Compute and remove the old role
@@ -286,7 +403,7 @@ class Moderation(commands.Cog):
                         clan_role = get(guild.roles, name=clan_info[0])
                         if not (clan_role in member.roles):
                             await member.add_roles(clan_role, reason="Clan Tag")
-                            await ctx.send(
+                            await testing_channel.send(
                                 "\U00002705 `" + member.display_name + "` aggiunto il ruolo `" + clan_role.name + "`")
 
                     # Change user nickname
@@ -302,81 +419,9 @@ class Moderation(commands.Cog):
                     await member.edit(nick=new_nickname)
 
                 except:
-                    await ctx.send("\U0000203C `" + member.display_name + "` non è stato trovato.")
+                    await testing_channel.send("\U0000203C `" + member.display_name + "` non è stato trovato.")
 
-        await ctx.send("\U0001F60A Fine!")
-
-    @commands.command()
-    async def rules(self, ctx):
-        channel = self.bot.get_channel(CH_TXT_TESTING)
-        await channel.send(
-            "**REGOLAMENTO**\n Le regole sono divise in 3 sezioni; le prime due descrivono le regole generali che tutti gli utenti all’interno del server devono seguire, mentre la terza parte regolamenta i comportamenti che ogni membro del clan deve mantenere.")
-        embed = Embed(title="Sezione 1 - Moralità del Clan",
-                      description="Un clan è essenzialmente composto da persone che, legate da un’attività in comune, dedicano parte del tempo per divertirsi insieme. Al fine di creare un luogo sereno, gli amministratori del server hanno il dovere di allontanare bandendo le persone che non rispettano i seguenti articoli.",
-                      color=0x710d0f)
-        embed.add_field(name="1.1", value="Rispettare tutte le persone all'interno di questo server.", inline=False)
-        embed.add_field(name="1.2", value="Essere educati o adottare un comportamento non violento o discriminatorio.",
-                        inline=False)
-        embed.add_field(name="1.3", value="Evitare discussioni aventi temi religiosi, razziali e politici.",
-                        inline=False)
-        embed.add_field(name="1.4",
-                        value="Sono ammessi comportamenti apertamente ironici, sempre nel limite del rispetto degli altri individui.",
-                        inline=False)
-        await channel.send(embed=embed)
-
-        embed = Embed(title="Sezione 2 - Il server",
-                      description="Il clan RAPAX si basa principalmente su Discord, cercando di sfruttare tutte le funzionalità di tale servizio di messaggistica. Per tale ragione è obbligatorio, pena l\’espulsione dal server, rispettare i seguenti articoli.",
-                      color=0xb85513)
-        embed.add_field(name="2.1",
-                        value="Il nickname di ogni giocatore all\’interno del server deve essere cambiato con `[clan tag] nickname (nome)`.",
-                        inline=False)
-        embed.add_field(name="2.1.1",
-                        value="Ogni utente è responsabile del proprio nickname: cambiando nickname o clan, sarà dovere suo cambiare il proprio nickname. È possibile che gli amministratori del server, attraverso un sistema automatizzato cambino il vostro nickname.",
-                        inline=False)
-        embed.add_field(name="2.2",
-                        value="Non menzionare le persone o gruppi di persone con troppa frequenza utilizzando il comando `@user/role`.",
-                        inline=False)
-        embed.add_field(name="2.3",
-                        value="Rispettare i topic dei canali testuali e vocali. L'argomento di ogni canale testuale è descritto in alto vicino al nome del canale. Per ogni canale è consigliato visionare i messaggi allegati.",
-                        inline=False)
-        await channel.send(embed=embed)
-
-        embed = Embed(title="Sezione 3 - Il clan RAPAX & GEMINA",
-                      description="La frequenza degli eventi del clan costituisce elemento fondante per l’aggregazione e lo sviluppo del clan stesso. Il mancato rispetto delle seguenti regole comporta l’espulsione dal clan.",
-                      color=0xffd519)
-        embed.add_field(name="3.1",
-                        value="L’uso di Discord per la comunicazione tra i membri del clan è obbligatoria, non è un’opzione.",
-                        inline=False)
-        embed.add_field(name="3.1.1",
-                        value="È fortemente consigliato utilizzare i canali vocali all’interno del server quando si sta giocando a World of Warships.",
-                        inline=False)
-        embed.add_field(name="3.1.2",
-                        value="Tutte le comunicazioni principali avvengono in <#680757461606727710>. È obbligatorio aggiornarsi sulle novità del clan tramite quel canale e interagire ai messaggi con le opportune reazioni laddove è richiesto.",
-                        inline=False)
-
-        embed.add_field(name="3.2",
-                        value="Partecipare agli allenamenti del clan. La partecipazione agli allenamenti è elemento necessario ma non sufficiente per poter partecipare agli eventi competitivi del clan.",
-                        inline=False)
-        embed.add_field(name="3.3", value="Partecipare alle Clan Battles e ai tornei vari.", inline=False)
-        embed.add_field(name="3.3.1",
-                        value="La partecipazione ai vari eventi è accessibile a tutti i membri salvo che il clan non decida di partecipare competitivamente.",
-                        inline=False)
-        embed.add_field(name="3.3.2",
-                        value="Durante tali attività, bisogna seguire gli ordini dei propri superiori. Se si crede che l’ordine sia errato, la contestazione deve avvenire in un momento tranquillo; è indispensabile l’aspetto critico nella discussione.",
-                        inline=False)
-
-        embed.add_field(name="3.4", value="Partecipare attivamente alle battaglie navali ogni weekend.", inline=False)
-        embed.add_field(name="3.5",
-                        value="I membri devono essere attivi almeno una volta ogni tre settimane, ossia l’indicatore *Last Battle Time* non deve superare i 21 giorni.",
-                        inline=False)
-        embed.add_field(name="3.6",
-                        value="Sono ammesse giustificazioni ragionevoli dalla mancata partecipazione alla vita del clan. È possibile che una prolungata assenza generi l’allontanamento dell’individuo dal clan.",
-                        inline=False)
-        embed.set_footer(
-            text="Se gli amministratori ritengono necessario, in casi eccezionali tali regole possono essere non applicate. Si riserva sempre agli amministratori la possibilità di modificare tali regole per migliorare la qualità del clan.")
-        await channel.send(embed=embed)
-
-        await channel.send("Link al server **Legio XXI - RAPAX**: https://discord.gg/jxyrQ9C")
+        await send_response_and_clear(inter, True, "Fatto!")
 
 
 def setup(bot: commands.Cog):

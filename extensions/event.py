@@ -1,5 +1,5 @@
-from discord import Member
-from discord.ext import commands
+from disnake import Member
+from disnake.ext import commands
 
 from utils.constants import *
 

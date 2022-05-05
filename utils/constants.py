@@ -1,6 +1,6 @@
 from enum import IntEnum
 
-DEBUG = False
+DEBUG = True
 
 # Guild's ID
 RAPAX_GUILD = 680755400655765515
@@ -113,32 +113,44 @@ voteKeys = (
     "- \U00002753 Forse"
 )
 
-CBEmoji = (
-    "\U00000031\U000020E3",
-    "\U00000032\U000020E3",
-    "\U0001F557",
-    "\U0000274C",
-    "\U00002753"
+weeklyCBEmoji = (
+    ":one:",
+    ":two:",
+    ":three:",
+    ":four:",
+    ":five:",
+    ":six:",
+    ":seven:",
+    ":eight:"
 )
 
-CBKeys = (
-    "- \U00000031\U000020E3 19:00-21:00",
-    "- \U00000032\U000020E3 21:00-23:00",
-    "- \U0001F557 Arrivo tardi",
-    "- \U0000274C Non disponibile",
-    "- \U00002753 Forse"
+weeklyCBKeys = (
+    "- :one: MER 19:00-21:00",
+    "- :two: MER 21:00-23:00",
+    "- :three: GIO 19:00-21:00",
+    "- :four: GIO 21:00-23:00",
+    "- :five: SAB 19:00-21:00",
+    "- :six: SAB 21:00-23:00",
+    "- :seven: DOM 19:00-21:00",
+    "- :eight DOM 21:00-23:00",
 )
 
-eventEmoji = (
-    "\U00002705",
-    "\U0001F557",
-    "\U0000274C",
-    "\U00002753"
+weeklyEventEmoji = (
+    ":one:",
+    ":two:",
+    ":three:",
+    ":four:",
+    ":five:",
+    ":six:",
+    ":seven:"
 )
 
-eventKeys = (
-    "- \U00002705 Presente",
-    "- \U0001F557 Arrivo tardi",
-    "- \U0000274C Assente",
-    "- \U00002753 Forse"
+weeklyEventKeys = (
+    "- :one: lunedì",
+    "- :two: martedì",
+    "- :three: mercoledì",
+    "- :four: giovedì",
+    "- :five: venerdì",
+    "- :six: sabato",
+    "- :seven: domenica"
 )

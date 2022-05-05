@@ -1,5 +1,6 @@
-from disnake import Intents, Activity, ActivityType
+from disnake import Intents, Activity, ActivityType, TextInputStyle
 from disnake.ext import commands
+import disnake
 
 import config
 

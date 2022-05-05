@@ -1,8 +1,6 @@
-import asyncio
-from random import choice
 from random import randrange, random
 
-from disnake import ApplicationCommandInteraction, Embed, Member
+from disnake import Member, TextChannel
 from disnake.ext import commands
 
 from utils.constants import *
@@ -14,7 +12,9 @@ VoteStyleOptions = commands.option_enum({
 })
 
 
-def get_emoji_style(style: VoteStyleOptions) -> list[str]:
+def get_emoji_style(
+        style: VoteStyleOptions
+) -> list[str]:
     match style:
         case "Default":
             return ["\U00002705", "\U0000274C"]
@@ -24,27 +24,28 @@ def get_emoji_style(style: VoteStyleOptions) -> list[str]:
             return []
 
 
-async def send_response_and_clear(inter: ApplicationCommandInteraction, text: str) -> None:
-    await inter.response.send_message(text)
-    await asyncio.sleep(5)
-    message = await inter.original_message()
-    await message.delete()
-
-
-class Entertainment(commands.Cog):
-    def __init__(self, bot: commands.Cog):
+class Entertainment(
+    commands.Cog
+):
+    def __init__(
+            self,
+            bot: commands.Cog
+    ):
         self.bot = bot
 
     @commands.slash_command(
         name="ping",
         description="Ping pong!"
     )
-    async def ping(self, inter: ApplicationCommandInteraction) -> None:
+    async def ping(
+            self,
+            inter: ApplicationCommandInteraction
+    ) -> None:
         """
         A simple slash command that responses with "Pong!".
 
         Args:
-            inter: it's the application command interation (context).
+            inter: the application command interation (context).
         
         Returns:
             None
@@ -52,71 +53,80 @@ class Entertainment(commands.Cog):
         await inter.response.send_message("Pong!")
 
     @commands.slash_command(
-        name="vota",
-        description="Aggiunge a `testo` le reazioni per poterlo votare."
+        name="vota"
     )
-    async def vota(self, inter: ApplicationCommandInteraction) -> None:
+    async def vota(
+            self,
+            inter: ApplicationCommandInteraction
+    ) -> None:
         pass
 
     @vota.sub_command(
         name="messaggio",
         description="Aggiunge le reazioni per poter votare uno specifico messaggio."
     )
-    async def messaggio(self, inter: ApplicationCommandInteraction, stile: VoteStyleOptions, id_canale: str,
-                        id_messaggio: str) -> None:
+    async def messaggio(
+            self,
+            inter: ApplicationCommandInteraction,
+            stile: VoteStyleOptions,
+            canale: TextChannel,
+            id_messaggio: str
+    ) -> None:
         """
         Add 2 reactions to the message's ID that matches with `messaggio`; there are two types of reactions: standard
         and reddit style. If the message's author is the person who called this command, it adds the emojis if the
         caller has at least the `executive officer` role.
 
         Args:
-            inter: it's the application command interation (context).
+            inter: the application command interation (context).
             stile: the style of the reactions.
-            id_canale: the message's channel's ID.
+            canale: the channel where the message is.
             id_messaggio: the message's ID that you want to add the reactions.
 
         Returns:
             None
         """
         author = inter.author
-        guild = inter.guild
         try:
-            channel = guild.get_channel(int(id_canale))
-            msg = await channel.fetch_message(int(id_messaggio))
+            msg = await canale.fetch_message(int(id_messaggio))
         except AttributeError:
-            send_response_and_clear(inter, "Messaggio/canale non trovato.")
+            await send_response_and_clear(inter, "Messaggio non trovato.")
             return
         except ValueError:
-            send_response_and_clear(inter, "L'ID del messaggio/canale non corretto.")
+            await send_response_and_clear(inter, "ID del messaggio non corretto.")
             return
         if msg.author != author:
             if not (await check_role(inter, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
-                send_response_and_clear(inter, "Non hai i permessi.")
+                await send_response_and_clear(inter, "Non hai i permessi.")
                 return
         emojis = get_emoji_style(stile)
         for emoji in emojis:
             await msg.add_reaction(emoji)
-        send_response_and_clear(inter, "Fatto!")
+        await send_response_and_clear(inter, "Fatto!")
         return
 
     @commands.slash_command(
         name="dice",
         description="Tira un dado con n facce. Di default n è 6"
     )
-    async def dice(self, inter: ApplicationCommandInteraction, n: int = 6) -> None:
+    async def dice(
+            self,
+            inter: ApplicationCommandInteraction,
+            n: int = 6
+    ) -> None:
         """
         Throws a die.
         By default, the dice has 6 sides, but you can change the number of sides writing the number than input.
 
         Args:
-            inter: it's the application command interation (context).
-            n: it's an optional parameter that states the number of the die's sides.
+            inter: the application command interation (context).
+            n: an optional parameter that states the number of the die's sides.
 
         Returns:
             None
         """
         if not (await check_role(inter, AuthorizationLevelEnum.OSPITI)):
-            send_response_and_clear(inter, "Non hai i permessi.")
+            await send_response_and_clear(inter, "Non hai i permessi.")
             return
         await inter.response.send_message("Risultato del dado a " + str(n) + " facce: **" + str(randrange(n) + 1) +
                                           "**")
@@ -125,18 +135,21 @@ class Entertainment(commands.Cog):
         name="coin",
         description="Lancia una moneta. Potrebbe cadere in piedi!"
     )
-    async def coin(self, inter: ApplicationCommandInteraction) -> None:
+    async def coin(
+            self,
+            inter: ApplicationCommandInteraction
+    ) -> None:
         """
         Throws a coin.
 
         Args:
-            inter: it's the application command interation (context).
+            inter: the application command interation (context).
 
         Returns:
             None
         """
         if not (await check_role(inter, AuthorizationLevelEnum.OSPITI)):
-            send_response_and_clear(inter, "Non hai i permessi.")
+            await send_response_and_clear(inter, "Non hai i permessi.")
             return
         x = random()
         if x > 0.5:
@@ -151,15 +164,21 @@ class Entertainment(commands.Cog):
         name="imprigiona",
         description="Mette in prigione un membro del clan per alcuni secondi."
     )
-    async def imprigiona(self, inter: ApplicationCommandInteraction, chi: Member, secondi: int, *,
-                         motivazione: str = None) -> None:
+    async def imprigiona(
+            self,
+            inter: ApplicationCommandInteraction,
+            chi: Member,
+            secondi: int,
+            *,
+            motivazione: str = ""
+    ) -> None:
         """
         Change temporarily the roles of the member passed as parameter.
         It removes all the roles and send him to the prison (if he's connected in a voice channel).
         After `secondi` seconds, it restores che member roles.
 
         Args:
-            inter: it's the application command interation (context).
+            inter: the application command interation (context).
             chi: the member who goes to the prison.
             secondi: the time in second.
             motivazione: the motivation.
@@ -168,7 +187,7 @@ class Entertainment(commands.Cog):
             None
         """
         if not (await check_role(inter, AuthorizationLevelEnum.UFFICIALE)):
-            send_response_and_clear(inter, "Non hai i permessi.")
+            await send_response_and_clear(inter, "Non hai i permessi.")
             return
         guild = inter.guild
         channel_text_prison = guild.get_channel(CH_TXT_PRIGIONE)
@@ -181,7 +200,7 @@ class Entertainment(commands.Cog):
         role = guild.get_role(PRIGIONIERO)
         # Check if the member already has prisoner role
         if role in list_roles:
-            send_response_and_clear(inter, "È già un prigionero.")
+            await send_response_and_clear(inter, "È già un prigionero.")
             return
         # Remove the member's roles and add the prisoner role
         for i in range(1, len(list_roles)):
@@ -199,7 +218,7 @@ class Entertainment(commands.Cog):
             motivazione = "\nMotivazione: " + motivazione
         await channel_text_prison.send(chi.display_name + " è stato messo in prigione per " + str(secondi) +
                                        " secondi." + motivazione)
-        send_response_and_clear(inter, "Fatto!")
+        await send_response_and_clear(inter, "Fatto!")
         # Wait
         await asyncio.sleep(secondi)
         # Restore member's roles
@@ -218,20 +237,24 @@ class Entertainment(commands.Cog):
         name="torpamico",
         description="Mette il ruolo torpamico per 5 minuti."
     )
-    async def torpamico(self, inter: ApplicationCommandInteraction, chi: Member) -> None:
+    async def torpamico(
+            self,
+            inter: ApplicationCommandInteraction,
+            chi: Member
+    ) -> None:
         """
         Add temporarily the roles 'torpedo-friend' role to the member passed as parameter.
         After 5 minutes, it removes the role.
 
         Args:
-            inter: it's the application command interation (context).
+            inter: the application command interation (context).
             chi: the member whose became 'torpedo-friend'.
 
         Returns:
             None
         """
         if not (await check_role(inter, AuthorizationLevelEnum.MEMBRO_DEL_CLAN)):
-            send_response_and_clear(inter, "Non hai i permessi.")
+            await send_response_and_clear(inter, "Non hai i permessi.")
             return
         guild = inter.guild
         channel = guild.get_channel(CH_TXT_PRIGIONE)
@@ -239,13 +262,13 @@ class Entertainment(commands.Cog):
         list_roles = chi.roles
         # Check if the member already has the torpedo-friend role
         if role in list_roles:
-            send_response_and_clear(inter, "È già un torpamico")
+            await send_response_and_clear(inter, "È già un torpamico")
             return None
         # Add the role
         await chi.add_roles(role)
         # Send ack
         await channel.send(chi.name + ' è diventato un torpamico per 5 minuti.')
-        send_response_and_clear(inter, "Fatto!")
+        await send_response_and_clear(inter, "Fatto!")
         # Sleep
         await asyncio.sleep(300)
         # Remove the role
