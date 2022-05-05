@@ -1,8 +1,11 @@
 from enum import IntEnum
 
-DEBUG = False
+DEBUG = True
 
-# Channels' ID
+# Guild's ID
+RAPAX_GUILD = 680755400655765515
+
+# Text channels' ID
 CH_TXT_TESTING = 711212263062765608
 CH_TXT_CALENDARIO = 968049716132712488
 CH_TXT_COM_DEL_COMANDO = 680757461606727710
@@ -10,6 +13,7 @@ CH_TXT_COM_TRA_MEMBRI = 680757657866600461
 CH_TXT_PRIGIONE = 783375373285982208
 CH_TXT_SALONE_OSPITI = 680765532626223215
 
+# Voice channels' ID
 CH_VCL_SALA_AMMINISTRAZIONE = 763116855660642414
 CH_VCL_PLANCIA_PUBBLICA = 821000173491978272
 CH_VCL_PRIGIONE_VOCALE = 836152721781293067
@@ -26,9 +30,6 @@ CB_BRAVO = 968099448876048424
 OSPITI = 680776924859334672
 PRIGIONIERO = 783375143593836595
 TORPAMICI = 696828138591879189
-
-# Guild's ID
-RAPAX_GUILD = 680755400655765515
 
 
 # Some Enums
@@ -112,32 +113,44 @@ voteKeys = (
     "- \U00002753 Forse"
 )
 
-CBEmoji = (
-    "\U00000031\U000020E3",
-    "\U00000032\U000020E3",
-    "\U0001F557",
-    "\U0000274C",
-    "\U00002753"
+weeklyCBEmoji = (
+    ":one:",
+    ":two:",
+    ":three:",
+    ":four:",
+    ":five:",
+    ":six:",
+    ":seven:",
+    ":eight:"
 )
 
-CBKeys = (
-    "- \U00000031\U000020E3 19:00-21:00",
-    "- \U00000032\U000020E3 21:00-23:00",
-    "- \U0001F557 Arrivo tardi",
-    "- \U0000274C Non disponibile",
-    "- \U00002753 Forse"
+weeklyCBKeys = (
+    "- :one: MER 19:00-21:00",
+    "- :two: MER 21:00-23:00",
+    "- :three: GIO 19:00-21:00",
+    "- :four: GIO 21:00-23:00",
+    "- :five: SAB 19:00-21:00",
+    "- :six: SAB 21:00-23:00",
+    "- :seven: DOM 19:00-21:00",
+    "- :eight DOM 21:00-23:00",
 )
 
-eventEmoji = (
-    "\U00002705",
-    "\U0001F557",
-    "\U0000274C",
-    "\U00002753"
+weeklyEventEmoji = (
+    ":one:",
+    ":two:",
+    ":three:",
+    ":four:",
+    ":five:",
+    ":six:",
+    ":seven:"
 )
 
-eventKeys = (
-    "- \U00002705 Presente",
-    "- \U0001F557 Arrivo tardi",
-    "- \U0000274C Assente",
-    "- \U00002753 Forse"
+weeklyEventKeys = (
+    "- :one: lunedì",
+    "- :two: martedì",
+    "- :three: mercoledì",
+    "- :four: giovedì",
+    "- :five: venerdì",
+    "- :six: sabato",
+    "- :seven: domenica"
 )
