@@ -52,7 +52,7 @@ async def check_role(inter: ApplicationCommandInteraction, level: AuthorizationL
 async def send_response_and_clear(
         inter: Union[ApplicationCommandInteraction, ModalInteraction],
         defer: bool,
-        text: str
+        text: str = "Done"
 ) -> None:
     if defer is True:
         await inter.send(text)
