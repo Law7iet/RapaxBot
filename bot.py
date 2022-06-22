@@ -1,4 +1,4 @@
-from disnake import Intents, Activity, ActivityType, TextInputStyle
+from disnake import Intents, TextInputStyle
 from disnake.ext import commands
 import disnake
 
@@ -11,8 +11,7 @@ if __name__ == "__main__":
     intents.members = True
     bot = commands.Bot(
             command_prefix=commands.when_mentioned_or(config.data["PREFIX"]),
-            intents=intents,
-            activity=Activity(type=ActivityType.watching, name="la tua webcam.")
+            intents=intents
     )
     extensions = ["moderation", "entertainment", "event"]
     for extension in extensions:
