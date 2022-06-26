@@ -90,19 +90,19 @@ class Entertainment(
         try:
             msg = await canale.fetch_message(int(id_messaggio))
         except AttributeError:
-            await send_response_and_clear(inter, "Messaggio non trovato.")
+            await send_response_and_clear(inter, False, "Messaggio non trovato.")
             return
         except ValueError:
-            await send_response_and_clear(inter, "ID del messaggio non corretto.")
+            await send_response_and_clear(inter, False, "ID del messaggio non corretto.")
             return
         if msg.author != author:
             if not (await check_role(inter, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
-                await send_response_and_clear(inter, "Non hai i permessi.")
+                await send_response_and_clear(inter, False, "Non hai i permessi.")
                 return
         emojis = get_emoji_style(stile)
         for emoji in emojis:
             await msg.add_reaction(emoji)
-        await send_response_and_clear(inter, "Fatto!")
+        await send_response_and_clear(inter, False, "Fatto!")
         return
 
     @commands.slash_command(
@@ -126,7 +126,7 @@ class Entertainment(
             None
         """
         if not (await check_role(inter, AuthorizationLevelEnum.OSPITI)):
-            await send_response_and_clear(inter, "Non hai i permessi.")
+            await send_response_and_clear(inter, False, "Non hai i permessi.")
             return
         await inter.response.send_message("Risultato del dado a " + str(n) + " facce: **" + str(randrange(n) + 1) +
                                           "**")
@@ -149,7 +149,7 @@ class Entertainment(
             None
         """
         if not (await check_role(inter, AuthorizationLevelEnum.OSPITI)):
-            await send_response_and_clear(inter, "Non hai i permessi.")
+            await send_response_and_clear(inter, False, "Non hai i permessi.")
             return
         x = random()
         if x > 0.5:
@@ -187,7 +187,7 @@ class Entertainment(
             None
         """
         if not (await check_role(inter, AuthorizationLevelEnum.UFFICIALE)):
-            await send_response_and_clear(inter, "Non hai i permessi.")
+            await send_response_and_clear(inter, False, "Non hai i permessi.")
             return
         guild = inter.guild
         channel_text_prison = guild.get_channel(CH_TXT_PRIGIONE)
@@ -200,7 +200,7 @@ class Entertainment(
         role = guild.get_role(PRIGIONIERO)
         # Check if the member already has prisoner role
         if role in list_roles:
-            await send_response_and_clear(inter, "È già un prigionero.")
+            await send_response_and_clear(inter, False, "È già un prigionero.")
             return
         # Remove the member's roles and add the prisoner role
         for i in range(1, len(list_roles)):
@@ -218,7 +218,7 @@ class Entertainment(
             motivazione = "\nMotivazione: " + motivazione
         await channel_text_prison.send(chi.display_name + " è stato messo in prigione per " + str(secondi) +
                                        " secondi." + motivazione)
-        await send_response_and_clear(inter, "Fatto!")
+        await send_response_and_clear(inter, False, "Fatto!")
         # Wait
         await asyncio.sleep(secondi)
         # Restore member's roles
@@ -254,7 +254,7 @@ class Entertainment(
             None
         """
         if not (await check_role(inter, AuthorizationLevelEnum.MEMBRO_DEL_CLAN)):
-            await send_response_and_clear(inter, "Non hai i permessi.")
+            await send_response_and_clear(inter, False, "Non hai i permessi.")
             return
         guild = inter.guild
         channel = guild.get_channel(CH_TXT_PRIGIONE)
@@ -262,13 +262,13 @@ class Entertainment(
         list_roles = chi.roles
         # Check if the member already has the torpedo-friend role
         if role in list_roles:
-            await send_response_and_clear(inter, "È già un torpamico")
+            await send_response_and_clear(inter, False, "È già un torpamico")
             return None
         # Add the role
         await chi.add_roles(role)
         # Send ack
         await channel.send(chi.name + ' è diventato un torpamico per 5 minuti.')
-        await send_response_and_clear(inter, "Fatto!")
+        await send_response_and_clear(inter, False, "Fatto!")
         # Sleep
         await asyncio.sleep(300)
         # Remove the role

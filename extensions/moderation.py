@@ -51,8 +51,7 @@ class Moderation(
         embed.set_author(name="RapaxBot")
         embed.set_thumbnail(url=icon)
 
-        await channel.send(ping)
-        msg = await channel.send(embed=embed)
+        msg = await channel.send(ping, embed=embed)
         for element in reactions:
             await msg.add_reaction(element)
 
