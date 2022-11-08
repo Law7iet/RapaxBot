@@ -18,6 +18,7 @@ if __name__ == "__main__":
         except Exception as error:
             print("{} cannot be loaded. [{}]".format(extension, error))
 
+    # Bot test slash command
     @bot.slash_command(description="Pong!")
     async def ping(inter: ApplicationCommandInteraction):
         await inter.response.send_message("Pong! `" +
