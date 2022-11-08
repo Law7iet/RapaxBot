@@ -1,5 +1,9 @@
+.config
 .DS_Store
+.git
+
 __pycache__
 config.json
-/.idea/*
 venv
+
+/.idea/*
