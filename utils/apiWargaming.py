@@ -1,40 +1,16 @@
-import config
-from utils.functions import *
-from config import data
+from settings.config import data
+from utils.functions import check_data
 
 
-class ApiWarGaming:
+class ApiWargaming:
     def __init__(self):
-        self.key = data['APPLICATION_ID']
+        self.key = data['WOWS_TOKEN']
         self.url_api_root = 'https://api.worldofwarships.eu/wows/'
         self.url_players = self.url_api_root + 'account/list/?application_id=' + self.key + '&search='
         self.url_player_personal_data = self.url_api_root + 'account/info/?application_id=' + self.key + '&account_id='
         self.url_clans = self.url_api_root + 'clans/list/?application_id=' + self.key + '&search='
         self.url_clan_details = self.url_api_root + 'clans/info/?application_id=' + self.key + '&clan_id='
-        self.url_ships = self.url_api_root + 'encyclopedia/ships/?application_id=' + self.key + '&fields=name%2C+tier%2C+ship_id%2C+is_special%2C+is_premium%2C+type%2C+nation&page_no='
-        self.url_player_ships = self.url_api_root + 'ships/stats/?application_id=' + self.key + '&fields=ship_id&account_id='
         self.url_player_clan_data = self.url_api_root + 'clans/accountinfo/?application_id=' + self.key + '&account_id='
-
-    def get_ships(self) -> list:
-        """
-        Returns a list with all World of Warships' ships.
-
-        Returns:
-            the list with all ships. If an error occurs, it returns an empty list.
-        """
-        ships = {}
-        page = 1
-        while True:
-            response_ships = check_data(self.url_ships + str(page))
-            if response_ships is None:
-                return []
-
-            ships.update(response_ships['data'])
-            page = page + 1
-            if page > response_ships['meta']['page_total']:
-                break
-
-        return ships.items()
 
     def get_clan_members(self, clan_id: int) -> list:
         """
@@ -47,30 +23,14 @@ class ApiWarGaming:
             the players' ID.
         """
         clan_members = []
-        response_clan_details = check_data(self.url_clan_details + str(clan_id))
+        response_clan_details = check_data(self.url_clan_details +
+                                           str(clan_id))
         if response_clan_details is None:
             return clan_members
-        for player_id in response_clan_details['data'][str(clan_id)]['members_ids']:
+        for player_id in response_clan_details['data'][str(
+                clan_id)]['members_ids']:
             clan_members.append(player_id)
         return clan_members
-
-    def get_player_ships(self, playerId: int) -> list:
-        """
-        Returns the list of the player's ships.
-
-        Args:
-            playerId: the player ID.
-
-        Returns:
-            the players' ships.
-        """
-        ships = []
-        response_member_data = check_data(self.url_player_ships + str(playerId))
-        if response_member_data is None:
-            return ships
-        for ship in response_member_data['data'][str(playerId)]:
-            ships.append(ship['ship_id'])
-        return ships
 
     def get_player_by_nick(self, nickname: str) -> tuple | None:
         """
@@ -105,6 +65,7 @@ class ApiWarGaming:
         url = self.url_player_personal_data + player_id
         # api call and check if the response is ok
         response = check_data(url)
+        print(response)
         try:
             response_data = response['data'][str(player_id)]
             return response_data['account_id'], response_data['nickname']
@@ -145,7 +106,8 @@ class ApiWarGaming:
         response = check_data(url)
         try:
             response_data = response['data']
-            return response_data[str(clan_id)]['name'], response_data[str(clan_id)]['tag']
+            return response_data[str(clan_id)]['name'], response_data[str(
+                clan_id)]['tag']
         except Exception as error:
             print('ApiWargaming.get_clan_name_by_id\n' + str(error))
             return None

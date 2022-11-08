@@ -1,9 +1,9 @@
 from random import randrange, random
 
-from disnake import Member, TextChannel
+from disnake import Member, TextChannel, ApplicationCommandInteraction
 from disnake.ext import commands
 
-from utils.constants import *
+from utils.constants import AuthorizationLevelEnum
 from utils.functions import *
 
 VoteStyleOptions = commands.option_enum({
@@ -12,9 +12,7 @@ VoteStyleOptions = commands.option_enum({
 })
 
 
-def get_emoji_style(
-        style: VoteStyleOptions
-) -> list[str]:
+def get_emoji_style(style: VoteStyleOptions) -> list[str]:
     match style:
         case "Default":
             return ["\U00002705", "\U0000274C"]
@@ -24,53 +22,21 @@ def get_emoji_style(
             return []
 
 
-class Entertainment(
-    commands.Cog
-):
-    def __init__(
-            self,
-            bot: commands.Cog
-    ):
+class Entertainment(commands.Cog):
+    def __init__(self, bot: commands.Cog):
         self.bot = bot
 
-    @commands.slash_command(
-        name="ping",
-        description="Ping pong!"
-    )
-    async def ping(
-            self,
-            inter: ApplicationCommandInteraction
-    ) -> None:
-        """
-        A simple slash command that responses with "Pong!".
-
-        Args:
-            inter: the application command interation (context).
-        
-        Returns:
-            None
-        """
-        await inter.response.send_message("Pong!")
-
-    @commands.slash_command(
-        name="vota"
-    )
-    async def vota(
-            self,
-            inter: ApplicationCommandInteraction
-    ) -> None:
+    @commands.slash_command()
+    async def vota(self, inter: ApplicationCommandInteraction) -> None:
         pass
 
-    @vota.sub_command(
-        name="messaggio",
-        description="Aggiunge le reazioni per poter votare uno specifico messaggio."
-    )
+    @vota.sub_command(description="Aggiunge le reazioni per poter votare uno specifico messaggio.")
     async def messaggio(
-            self,
-            inter: ApplicationCommandInteraction,
-            stile: VoteStyleOptions,
-            canale: TextChannel,
-            id_messaggio: str
+        self,
+        inter: ApplicationCommandInteraction,
+        stile: VoteStyleOptions,
+        canale: TextChannel,
+        id_messaggio: str
     ) -> None:
         """
         Add 2 reactions to the message's ID that matches with `messaggio`; there are two types of reactions: standard
@@ -105,15 +71,8 @@ class Entertainment(
         await send_response_and_clear(inter, False, "Fatto!")
         return
 
-    @commands.slash_command(
-        name="dice",
-        description="Tira un dado con n facce. Di default n è 6"
-    )
-    async def dice(
-            self,
-            inter: ApplicationCommandInteraction,
-            n: int = 6
-    ) -> None:
+    @commands.slash_command(description="Tira un dado con n facce. Di default n è 6.")
+    async def dice(self, inter: ApplicationCommandInteraction, n: int = 6) -> None:
         """
         Throws a die.
         By default, the dice has 6 sides, but you can change the number of sides writing the number than input.
@@ -131,14 +90,8 @@ class Entertainment(
         await inter.response.send_message("Risultato del dado a " + str(n) + " facce: **" + str(randrange(n) + 1) +
                                           "**")
 
-    @commands.slash_command(
-        name="coin",
-        description="Lancia una moneta. Potrebbe cadere in piedi!"
-    )
-    async def coin(
-            self,
-            inter: ApplicationCommandInteraction
-    ) -> None:
+    @commands.slash_command(description="Lancia una moneta. Potrebbe cadere in piedi!")
+    async def coin(self, inter: ApplicationCommandInteraction) -> None:
         """
         Throws a coin.
 
@@ -160,17 +113,14 @@ class Entertainment(
             message = "@everyone la moneta è caduta in piedi!"
         await inter.response.send_message(message)
 
-    @commands.slash_command(
-        name="imprigiona",
-        description="Mette in prigione un membro del clan per alcuni secondi."
-    )
+    @commands.slash_command(description="Mette in prigione un membro del clan per alcuni secondi.")
     async def imprigiona(
-            self,
-            inter: ApplicationCommandInteraction,
-            chi: Member,
-            secondi: int,
-            *,
-            motivazione: str = ""
+        self,
+        inter: ApplicationCommandInteraction,
+        chi: Member,
+        secondi: int,
+        *,
+        motivazione: str = ""
     ) -> None:
         """
         Change temporarily the roles of the member passed as parameter.
@@ -233,15 +183,8 @@ class Entertainment(
         # Send ack
         await channel_text_prison.send(chi.display_name + " ha scontato la propria pena. Fine della quarantena.")
 
-    @commands.slash_command(
-        name="torpamico",
-        description="Mette il ruolo torpamico per 5 minuti."
-    )
-    async def torpamico(
-            self,
-            inter: ApplicationCommandInteraction,
-            chi: Member
-    ) -> None:
+    @commands.slash_command(description="Mette il ruolo torpamico per 5 minuti.")
+    async def torpamico(self, inter: ApplicationCommandInteraction, chi: Member) -> None:
         """
         Add temporarily the roles 'torpedo-friend' role to the member passed as parameter.
         After 5 minutes, it removes the role.
@@ -275,7 +218,7 @@ class Entertainment(
         await chi.remove_roles(role)
         # Send ack
         await channel.send(chi.name + ' non è più torpamico.')
-
+        
 
 def setup(bot):
     bot.add_cog(Entertainment(bot))

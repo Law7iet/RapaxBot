@@ -1,11 +1,10 @@
 import re
 
-from disnake import Embed, Role, TextChannel, errors
+from disnake import Embed, Role, TextChannel, errors, ApplicationCommandInteraction
 from disnake.ext import commands
 
-from utils.apiWarGaming import ApiWarGaming
-from utils.constants import *
-from utils.functions import *
+from utils.constants import OSPITI, CH_TXT_TESTING, CH_TXT_CALENDARIO
+from utils.functions import send_response_and_clear, check_role
 
 from utils.modal import Modal
 
@@ -15,30 +14,23 @@ EventOptions = commands.option_enum({
 })
 
 
-class Moderation(
-    commands.Cog
-):
-    def __init__(
-            self,
-            bot: commands.Cog
-    ):
+class Moderation(commands.Cog):
+    def __init__(self, bot: commands.Cog):
         self.bot = bot
-        self.apiWargaming = ApiWarGaming()
 
     async def presenze(
-            self,
-            inter: ApplicationCommandInteraction,
-            evento: EventOptions,
-            ruolo: Role,
-            messaggio: str,
-            keys: list[str],
-            reactions: list[str],
-            icon: str
+        self,
+        inter: ApplicationCommandInteraction,
+        evento: EventOptions,
+        ruolo: Role,
+        messaggio: str,
+        keys: list[str],
+        reactions: list[str],
+        icon: str
     ):
         if not (await check_role(inter, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
             await send_response_and_clear(inter, False, "Non hai i permessi.")
             return
-        # TEST MODE
         if DEBUG:
             channel = self.bot.get_channel(CH_TXT_TESTING)
             ping = "<@&" + str(OSPITI) + ">"
@@ -57,24 +49,16 @@ class Moderation(
 
         await send_response_and_clear(inter, True, "Fatto!")
 
-    @commands.slash_command(
-        name="scrivi"
-    )
-    async def scrivi(
-            self,
-            inter: ApplicationCommandInteraction
-    ) -> None:
+    @commands.slash_command()
+    async def scrivi(self, inter: ApplicationCommandInteraction) -> None:
         pass
 
-    @scrivi.sub_command(
-        name="messaggio",
-        description="Il bot scrive un messaggio per te."
-    )
+    @scrivi.sub_command(description="Il bot scrive un messaggio per te.")
     async def messaggio(
-            self,
-            inter: ApplicationCommandInteraction,
-            canale: TextChannel,
-            ruolo: Role
+        self,
+        inter: ApplicationCommandInteraction,
+        canale: TextChannel,
+        ruolo: Role
     ) -> None:
         """
         Write an embed message using the bot profile. The message must tag a role and it must have a text. The title is
@@ -93,25 +77,17 @@ class Moderation(
             return
         await inter.response.send_modal(modal=Modal(ruolo, canale))
 
-    @commands.slash_command(
-        name="modifica"
-    )
-    async def modifica(
-            self,
-            inter: ApplicationCommandInteraction
-    ) -> None:
+    @commands.slash_command()
+    async def modifica(self, inter: ApplicationCommandInteraction) -> None:
         pass
 
-    @modifica.sub_command(
-        name="messaggio",
-        description="Modifica un messaggio-embed del bot."
-    )
+    @modifica.sub_command(description="Modifica un messaggio-embed del bot.")
     async def messaggio(
-            self,
-            inter: ApplicationCommandInteraction,
-            canale: TextChannel,
-            id_messaggio: str,
-            ruolo: Role
+        self,
+        inter: ApplicationCommandInteraction,
+        canale: TextChannel,
+        id_messaggio: str,
+        ruolo: Role
     ) -> None:
         """
         Edit the embed message. If in the modal the fields are empty, it doesn't edit the empty field.
@@ -130,25 +106,17 @@ class Moderation(
             return
         await inter.response.send_modal(modal=Modal(ruolo, canale, id_messaggio))
 
-    @commands.slash_command(
-        name="aggiungi"
-    )
-    async def aggiungi(
-            self,
-            inter: ApplicationCommandInteraction
-    ) -> None:
+    @commands.slash_command()
+    async def aggiungi(self, inter: ApplicationCommandInteraction) -> None:
         pass
 
-    @aggiungi.sub_command(
-        name="reazione",
-        description="Aggiunge una reazione al messaggio indicato."
-    )
+    @aggiungi.sub_command(description="Aggiunge una reazione al messaggio indicato.")
     async def reazione(
-            self,
-            inter: ApplicationCommandInteraction,
-            canale: TextChannel,
-            id_messaggio: str,
-            emoji: str
+        self,
+        inter: ApplicationCommandInteraction,
+        canale: TextChannel,
+        id_messaggio: str,
+        emoji: str
     ) -> None:
         """
         Add a reaction to a message. It works only for default's emoji and server's emoji.
@@ -184,25 +152,17 @@ class Moderation(
                     return
         await send_response_and_clear(inter, False, "Fatto!")
 
-    @commands.slash_command(
-        name="presenza"
-    )
-    async def presenza(
-            self,
-            inter: ApplicationCommandInteraction
-    ) -> None:
+    @commands.slash_command()
+    async def presenza(self, inter: ApplicationCommandInteraction) -> None:
         pass
 
-    @presenza.sub_command(
-        name="giornaliera",
-        description="Manda le presenze per un evento"
-    )
+    @presenza.sub_command(description="Manda le presenze per un evento")
     async def giornaliera(
-            self,
-            inter: ApplicationCommandInteraction,
-            evento: EventOptions,
-            ruolo: Role,
-            messaggio: str = ""
+        self,
+        inter: ApplicationCommandInteraction,
+        evento: EventOptions,
+        ruolo: Role,
+        messaggio: str = ""
     ) -> None:
         """
         Generate the participation message for a specific Clan Battles or Training day.
@@ -252,16 +212,13 @@ class Moderation(
                 return
         await self.presenze(inter, evento, ruolo, messaggio, keys, reactions, icon)
 
-    @presenza.sub_command(
-        name="settimanale",
-        description="Richiede le presenze dei giocatori per una settimana."
-    )
+    @presenza.sub_command(description="Richiede le presenze dei giocatori per una settimana.")
     async def settimanale(
-            self,
-            inter: ApplicationCommandInteraction,
-            evento: EventOptions,
-            ruolo: Role,
-            messaggio: str = ""
+        self,
+        inter: ApplicationCommandInteraction,
+        evento: EventOptions,
+        ruolo: Role,
+        messaggio: str = ""
     ) -> None:
         """
         Generate the participation message for the Clan Battles or Training.
@@ -326,101 +283,6 @@ class Moderation(
             case _:
                 return
         await self.presenze(inter, evento, ruolo, messaggio, keys, reactions, icon)
-
-    @commands.slash_command(
-        name="nickname"
-    )
-    async def nickname(
-            self,
-            inter: ApplicationCommandInteraction
-    ) -> None:
-        """
-        Check the server's guests' nickname and role. The bot change their nickname with their game nickname, using
-        their current nickname. It adds the clans tag at the beginning. Each clan has a role, if not, it creates it and
-        add it to the member.
-
-        Args:
-            inter: the application command interation (context).
-
-        Returns:
-            None
-        """
-        await inter.response.defer()
-        if not (await check_role(inter, AuthorizationLevelEnum.UFFICIALE_ESECUTIVO)):
-            await send_response_and_clear(inter, False, "Non hai i permessi.")
-            return
-        guild = inter.guild
-        testing_channel = guild.get_channel(CH_TXT_TESTING)
-        members = guild.members
-        # For each member of the server
-        for member in members:
-            # Only if the member has OSPITI role
-            if guild.get_role(OSPITI) in member.roles:
-                # Get Discord's member nick
-                # Split tag, nick and name
-                tmp = re.sub(r"\[.+\]", "", member.display_name)
-                tmp = re.sub(r"\(.+\)", "", tmp)
-                user_current_nickname = tmp.lstrip().rstrip()
-                try:
-                    user_current_tag = re.search("\[.+\]", member.display_name).group(0)[1:-1]
-                except:
-                    user_current_tag = ''
-                try:
-                    user_current_name = re.search("\(.+\)", member.display_name).group(0)
-                except:
-                    user_current_name = ''
-                try:
-                    # search nick with WoWs API
-                    player_info = self.apiWargaming.get_player_by_nick(user_current_nickname)
-                    if player_info is None:
-                        await testing_channel.send("\U000026A0 Il membro `" + member.display_name + "` non è stato trovato.")
-                        continue
-                    # search tag with WoWs API
-                    clan_id = self.apiWargaming.get_clan_by_player_id(player_info[0])
-
-                    if DEBUG:
-                        print(user_current_nickname + ": " + str(clan_id))
-
-                    if clan_id is None:
-                        # The player has not a clan
-                        pass
-                    else:
-                        # The player has a clan
-                        # Check if the role exists, else create it
-                        clan_info = self.apiWargaming.get_clan_name_by_id(clan_id)
-                        if get(guild.roles, name=clan_info[0]) is None:
-                            await guild.create_role(name=clan_info[0], hoist=True, reason='Tag del Clan')
-                            await testing_channel.send("\U0001F464 nuovo tag: `" + clan_info[0] + "`")
-                        # Change user tag
-                        if clan_info[1] != user_current_tag:
-                            user_current_tag = clan_info[1]
-                            await testing_channel.send(
-                                "\U00002705 `" + member.display_name + "` cambiato tag `" + clan_info[1] + "`")
-                        # Change user role
-                        # TO-DO: Compute and remove the old role
-                        # Add the role
-                        clan_role = get(guild.roles, name=clan_info[0])
-                        if not (clan_role in member.roles):
-                            await member.add_roles(clan_role, reason="Clan Tag")
-                            await testing_channel.send(
-                                "\U00002705 `" + member.display_name + "` aggiunto il ruolo `" + clan_role.name + "`")
-
-                    # Change user nickname
-                    if user_current_nickname != player_info[1]:
-                        user_current_nickname = player_info[1]
-                    # set ready the new full nickname
-                    if user_current_tag != '':
-                        user_current_tag = "[" + user_current_tag + "] "
-                    new_nickname = user_current_tag + user_current_nickname + " " + user_current_name
-                    if len(new_nickname) > 32:
-                        new_nickname = user_current_tag + " " + user_current_nickname
-                    # Edit member
-                    await member.edit(nick=new_nickname)
-
-                except:
-                    await testing_channel.send("\U0000203C `" + member.display_name + "` non è stato trovato.")
-
-        await send_response_and_clear(inter, True, "Fatto!")
 
 
 def setup(bot: commands.Cog):

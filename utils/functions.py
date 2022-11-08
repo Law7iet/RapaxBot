@@ -30,7 +30,8 @@ def check_data(url: str) -> dict | None:
         return data
 
 
-async def check_role(inter: ApplicationCommandInteraction, level: AuthorizationLevelEnum) -> bool:
+async def check_role(inter: ApplicationCommandInteraction,
+                     level: AuthorizationLevelEnum) -> bool:
     """
     Check if the sender has the correct role.
     It's use for authorization member to trigger bots command.
@@ -49,11 +50,10 @@ async def check_role(inter: ApplicationCommandInteraction, level: AuthorizationL
     return False
 
 
-async def send_response_and_clear(
-        inter: Union[ApplicationCommandInteraction, ModalInteraction],
-        defer: bool,
-        text: str = "Done"
-) -> None:
+async def send_response_and_clear(inter: Union[ApplicationCommandInteraction,
+                                               ModalInteraction],
+                                  defer: bool,
+                                  text: str = "Done") -> None:
     if defer is True:
         await inter.send(text)
     else:
