@@ -1,6 +1,6 @@
 from enum import IntEnum
 
-DEBUG = False
+DEBUG = True
 
 # Guild's ID
 RAPAX_GUILD = 680755400655765515
@@ -73,56 +73,21 @@ class ShipsTierEnum(IntEnum):
 
 
 # Some Tuples
-authorizationLevel = (
-    -1,
-    AMMINISTRATORE,
-    COMANDANTE,
-    UFFICIALE_ESECUTIVO,
-    RECLUTATORE,
-    UFFICIALE,
-    MEMBRO_DEL_CLAN,
-    OSPITI
-)
+authorizationLevel = (-1, AMMINISTRATORE, COMANDANTE, UFFICIALE_ESECUTIVO,
+                      RECLUTATORE, UFFICIALE, MEMBRO_DEL_CLAN, OSPITI)
 
-wowsEvent = (
-    '',
-    'allenamento',
-    'Clan Brawl',
-    'Clan Battle',
-    'torneo'
-)
+wowsEvent = ('', 'allenamento', 'Clan Brawl', 'Clan Battle', 'torneo')
 
-shipsType = (
-    '',
-    'Destroyer',
-    'Cruiser',
-    'Battleship',
-    'AirCarrier',
-    'Submarine'
-)
+shipsType = ('', 'Destroyer', 'Cruiser', 'Battleship', 'AirCarrier',
+             'Submarine')
 
-voteEmoji = (
-    "\U00002705",
-    "\U0000274C",
-    "\U00002753"
-)
+voteEmoji = ("\U00002705", "\U0000274C", "\U00002753")
 
-voteKeys = (
-    "- \U00002705 Presente",
-    "- \U0000274C Assente",
-    "- \U00002753 Forse"
-)
+voteKeys = ("- \U00002705 Presente", "- \U0000274C Assente",
+            "- \U00002753 Forse")
 
-weeklyCBEmoji = (
-    ":one:",
-    ":two:",
-    ":three:",
-    ":four:",
-    ":five:",
-    ":six:",
-    ":seven:",
-    ":eight:"
-)
+weeklyCBEmoji = (":one:", ":two:", ":three:", ":four:", ":five:", ":six:",
+                 ":seven:", ":eight:")
 
 weeklyCBKeys = (
     "- :one: MER 19:00-21:00",
@@ -135,22 +100,9 @@ weeklyCBKeys = (
     "- :eight DOM 21:00-23:00",
 )
 
-weeklyEventEmoji = (
-    ":one:",
-    ":two:",
-    ":three:",
-    ":four:",
-    ":five:",
-    ":six:",
-    ":seven:"
-)
+weeklyEventEmoji = (":one:", ":two:", ":three:", ":four:", ":five:", ":six:",
+                    ":seven:")
 
-weeklyEventKeys = (
-    "- :one: lunedì",
-    "- :two: martedì",
-    "- :three: mercoledì",
-    "- :four: giovedì",
-    "- :five: venerdì",
-    "- :six: sabato",
-    "- :seven: domenica"
-)
+weeklyEventKeys = ("- :one: lunedì", "- :two: martedì", "- :three: mercoledì",
+                   "- :four: giovedì", "- :five: venerdì", "- :six: sabato",
+                   "- :seven: domenica")
