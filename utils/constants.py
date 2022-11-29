@@ -83,8 +83,11 @@ shipsType = ('', 'Destroyer', 'Cruiser', 'Battleship', 'AirCarrier',
 
 voteEmoji = ("\U00002705", "\U0000274C", "\U00002753")
 
-voteKeys = ("- \U00002705 Presente", "- \U0000274C Assente",
-            "- \U00002753 Forse")
+voteKeys = (
+    "- \U00002705 Presente",
+    "- \U0000274C Assente",
+    "- \U00002753 Forse"
+)
 
 weeklyCBEmoji = (":one:", ":two:", ":three:", ":four:", ":five:", ":six:",
                  ":seven:", ":eight:")

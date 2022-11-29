@@ -1,10 +1,11 @@
-from random import randrange, random
+from random import randrange, random, sample
 
-from disnake import Member, TextChannel, ApplicationCommandInteraction
+from disnake import Member, TextChannel
 from disnake.ext import commands
 
-from utils.constants import AuthorizationLevelEnum
+from utils.constants import AuthorizationLevelEnum, CH_TXT_PRIGIONE, CH_VCL_PRIGIONE_VOCALE, AMMINISTRATORE, PRIGIONIERO, TORPAMICI
 from utils.functions import *
+from utils.apiWargaming import ApiWargaming
 
 VoteStyleOptions = commands.option_enum({
     "Default": "Default",
@@ -22,9 +23,35 @@ def get_emoji_style(style: VoteStyleOptions) -> list[str]:
             return []
 
 
+TierOptions = commands.option_enum({
+    "All": "All",
+    "1": "1",
+    "2": "2",
+    "3": "3",
+    "4": "4",
+    "5": "5",
+    "6": "6",
+    "7": "7",
+    "8": "8",
+    "9": "9",
+    "10": "10",
+    "11": "11",
+})
+
+ShipTypeOptions = commands.option_enum({
+    "All": "All",
+    "Destroyer": "Destroyer",
+    "Cruiser": "Cruiser",
+    "Battleship": "Battleship",
+    "Aircraft Carrier": "AirCarrier"
+    # "Submarine": "Submarine"
+})
+
+
 class Entertainment(commands.Cog):
     def __init__(self, bot: commands.Cog):
         self.bot = bot
+        self.apiWargaming = ApiWargaming()
 
     @commands.slash_command()
     async def vota(self, inter: ApplicationCommandInteraction) -> None:
@@ -32,11 +59,11 @@ class Entertainment(commands.Cog):
 
     @vota.sub_command(description="Aggiunge le reazioni per poter votare uno specifico messaggio.")
     async def messaggio(
-        self,
-        inter: ApplicationCommandInteraction,
-        stile: VoteStyleOptions,
-        canale: TextChannel,
-        id_messaggio: str
+            self,
+            inter: ApplicationCommandInteraction,
+            stile: VoteStyleOptions,
+            canale: TextChannel,
+            id_messaggio: str
     ) -> None:
         """
         Add 2 reactions to the message's ID that matches with `messaggio`; there are two types of reactions: standard
@@ -115,12 +142,12 @@ class Entertainment(commands.Cog):
 
     @commands.slash_command(description="Mette in prigione un membro del clan per alcuni secondi.")
     async def imprigiona(
-        self,
-        inter: ApplicationCommandInteraction,
-        chi: Member,
-        secondi: int,
-        *,
-        motivazione: str = ""
+            self,
+            inter: ApplicationCommandInteraction,
+            chi: Member,
+            secondi: int,
+            *,
+            motivazione: str = ""
     ) -> None:
         """
         Change temporarily the roles of the member passed as parameter.
@@ -218,7 +245,131 @@ class Entertainment(commands.Cog):
         await chi.remove_roles(role)
         # Send ack
         await channel.send(chi.name + ' non è più torpamico.')
-        
+
+    @commands.slash_command(description="Sceglie alcune navi a caso di un giocatore.")
+    async def randomize(self, inter: ApplicationCommandInteraction, giocatore: str, tipo: ShipTypeOptions,
+                        tier: TierOptions) -> None:
+        await inter.response.defer()
+        found_player = self.apiWargaming.get_player_by_nick(giocatore)
+        if not found_player:
+            await send_response_and_clear(inter, True, "Giocatore non trovato")
+        else:
+            player_id = found_player[0]
+            player_ships_id = self.apiWargaming.get_player_ships(player_id)
+            if not player_ships_id:
+                await send_response_and_clear(inter, True, "Giocatore non ha navi o ha l'account privato")
+            else:
+                player_mapped_ships = [
+                    {
+                        "Destroyer": list(),
+                        "Cruiser": list(),
+                        "Battleship": list(),
+                        "AirCarrier": list()
+                    },
+                    {
+                        "Destroyer": list(),
+                        "Cruiser": list(),
+                        "Battleship": list(),
+                        "AirCarrier": list()
+                    },
+                    {
+                        "Destroyer": list(),
+                        "Cruiser": list(),
+                        "Battleship": list(),
+                        "AirCarrier": list()
+                    },
+                    {
+                        "Destroyer": list(),
+                        "Cruiser": list(),
+                        "Battleship": list(),
+                        "AirCarrier": list()
+                    },
+                    {
+                        "Destroyer": list(),
+                        "Cruiser": list(),
+                        "Battleship": list(),
+                        "AirCarrier": list()
+                    },
+                    {
+                        "Destroyer": list(),
+                        "Cruiser": list(),
+                        "Battleship": list(),
+                        "AirCarrier": list()
+                    },
+                    {
+                        "Destroyer": list(),
+                        "Cruiser": list(),
+                        "Battleship": list(),
+                        "AirCarrier": list()
+                    },
+                    {
+                        "Destroyer": list(),
+                        "Cruiser": list(),
+                        "Battleship": list(),
+                        "AirCarrier": list()
+                    },
+                    {
+                        "Destroyer": list(),
+                        "Cruiser": list(),
+                        "Battleship": list(),
+                        "AirCarrier": list()
+                    },
+                    {
+                        "Destroyer": list(),
+                        "Cruiser": list(),
+                        "Battleship": list(),
+                        "AirCarrier": list()
+                    },
+                    {
+                        "Destroyer": list(),
+                        "Cruiser": list(),
+                        "Battleship": list(),
+                        "AirCarrier": list()
+                    }
+                ]
+
+                while len(player_ships_id) > 0:
+                    num = len(player_ships_id) if len(player_ships_id) < 100 else 100
+                    iteration = 0
+                    query = ""
+                    while iteration < num:
+                        iteration = iteration + 1
+                        ship_id = player_ships_id.pop(0)
+                        query = query + str(ship_id) + "%2C+"
+                    query = query[:-4]
+
+                    res_data = await self.apiWargaming.get_ships_tier_and_name(query, tipo)
+                    if res_data is None:
+                        print("sus")
+                        return
+                    for key in res_data.keys():
+                        if res_data[key] is None:
+                            continue
+                        else:
+                            ship = res_data[key]
+                            if ship["name"][0] == "[" and ship["name"][-1] == "]":
+                                continue
+                            if tipo == "All":
+                                player_mapped_ships[ship["tier"] - 1][ship["type"]].append(ship["name"])
+                            else:
+                                player_mapped_ships[ship["tier"] - 1][tipo].append(ship["name"])
+
+                # Print ships
+                ships_pool = []
+                for index in range(0, len(player_mapped_ships)):
+                    if tier == "All" or int(tier) == index + 1:
+                        for key in player_mapped_ships[index].keys():
+                            if tipo == "All" or tipo == key:
+                                ships_pool = ships_pool + player_mapped_ships[index][key]
+                if len(ships_pool) == 0:
+                    await send_response_and_clear(inter, True,
+                                                  "Nessuna nave trovata di tipo " + tipo + " al tier " + tier)
+                else:
+                    ships = sample(ships_pool, 5 if len(ships_pool) >= 5 else len(ships_pool))
+                    message = "Giocatore: `" + giocatore + "`\nTipologia di nave: `" + tipo + "`\nTier: `" + tier + "`\n" + ", ".join(
+                        ships)
+                    await inter.send(message)
+
 
 def setup(bot):
     bot.add_cog(Entertainment(bot))

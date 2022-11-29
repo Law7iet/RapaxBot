@@ -11,6 +11,8 @@ class ApiWargaming:
         self.url_clans = self.url_api_root + 'clans/list/?application_id=' + self.key + '&search='
         self.url_clan_details = self.url_api_root + 'clans/info/?application_id=' + self.key + '&clan_id='
         self.url_player_clan_data = self.url_api_root + 'clans/accountinfo/?application_id=' + self.key + '&account_id='
+        self.url_player_ships = self.url_api_root + 'ships/stats/?application_id=' + self.key + '&fields=ship_id&account_id='
+        self.url_ships_details = self.url_api_root + "encyclopedia/ships/?application_id=" + self.key
 
     def get_clan_members(self, clan_id: int) -> list:
         """
@@ -111,3 +113,30 @@ class ApiWargaming:
         except Exception as error:
             print('ApiWargaming.get_clan_name_by_id\n' + str(error))
             return None
+
+    def get_player_ships(self, playerId: int) -> list:
+        """
+        Returns the list of the player's ships.
+        Args:
+            playerId: the player ID.
+        Returns:
+            the players' ships.
+        """
+        ships = []
+        response_member_data = check_data(self.url_player_ships + str(playerId))
+        if response_member_data is None:
+            return ships
+        for ship in response_member_data['data'][str(playerId)]:
+            ships.append(ship['ship_id'])
+        return ships
+
+    async def get_ships_tier_and_name(self, ships: str, ships_type: str):
+        query = "&fields=name%2C+tier%2C+type"
+        if ships_type != "All":
+            query = "&type=" + ships_type + query
+        query = self.url_ships_details + "&ship_id=" + ships + query
+        response_member_data = check_data(query)
+        if response_member_data is None:
+            return None
+        else:
+            return response_member_data["data"]

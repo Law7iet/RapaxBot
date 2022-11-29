@@ -3,7 +3,7 @@ import re
 from disnake import Embed, Role, TextChannel, errors, ApplicationCommandInteraction
 from disnake.ext import commands
 
-from utils.constants import OSPITI, CH_TXT_TESTING, CH_TXT_CALENDARIO
+from utils.constants import OSPITI, CH_TXT_TESTING, CH_TXT_CALENDARIO, AuthorizationLevelEnum, DEBUG
 from utils.functions import send_response_and_clear, check_role
 
 from utils.modal import Modal
