@@ -1,7 +1,7 @@
 from settings import config
 from settings.keep_alive import keep_alive
 from disnake import Intents, HTTPException, ApplicationCommandInteraction
-from disnake.ext import commands
+from disnake.ext import commands, tasks
 from utils.constants import RAPAX_GUILD
 
 if __name__ == "__main__":
@@ -25,9 +25,14 @@ if __name__ == "__main__":
                                           str(round(bot.latency * 1000)) +
                                           "ms`")
 
+    # Bot loop
+    @tasks.loop(seconds=10.0)
+    async def foo():
+        return
+
     # Run bot
     try:
-        keep_alive()
+        # keep_alive()
         bot.run(config.data["DISCORD_TOKEN"])
     except HTTPException as e:
         if e.status == 429:
