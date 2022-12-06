@@ -1,9 +1,18 @@
-.config
-.DS_Store
+# Git
 .git
-
+# Python
 __pycache__
+# JetBrains
+.idea
+# MacOS
+.DS_Store
+# Own files
 config.json
+# Replit
+.breakpoints
+.config
+.replit
+poetry.lock
+pyproject.toml
+replit.nix
 venv
-
-/.idea/*
