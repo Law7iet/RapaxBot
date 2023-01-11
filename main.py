@@ -1,3 +1,4 @@
+from os import system
 from settings import config
 from settings.keep_alive import keep_alive
 from disnake import Intents, HTTPException, ApplicationCommandInteraction
@@ -21,9 +22,7 @@ if __name__ == "__main__":
     # Bot test slash command
     @bot.slash_command(description="Pong!")
     async def ping(inter: ApplicationCommandInteraction):
-        await inter.response.send_message("Pong! `" +
-                                          str(round(bot.latency * 1000)) +
-                                          "ms`")
+        await inter.response.send_message("Pong! `" + str(round(bot.latency * 1000)) + "ms`")
 
     # Bot loop
     @tasks.loop(seconds=10.0)
@@ -32,11 +31,13 @@ if __name__ == "__main__":
 
     # Run bot
     try:
-        # keep_alive()
+        keep_alive()
         bot.run(config.data["DISCORD_TOKEN"])
     except HTTPException as e:
         if e.status == 429:
             print("Discord servers denied the connection: too many requests")
-            print("Stop the process with \"kill 1\"")
+            print("\n\n\nBLOCKED BY RATE LIMITS\nRESTARTING NOW\n\n\n")
+            system("python restarter.py")
+            system('kill 1')
         else:
             raise e
