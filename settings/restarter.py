@@ -3,4 +3,4 @@ from os import system
 
 
 sleep(7)
-system("python main.py")
+system("python3 main.py")

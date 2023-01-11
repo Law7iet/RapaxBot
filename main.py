@@ -37,7 +37,7 @@ if __name__ == "__main__":
         if e.status == 429:
             print("Discord servers denied the connection: too many requests")
             print("\n\n\nBLOCKED BY RATE LIMITS\nRESTARTING NOW\n\n\n")
-            system("python restarter.py")
+            system("python ./settings/restarter.py")
             system('kill 1')
         else:
             raise e
