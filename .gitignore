@@ -16,3 +16,6 @@ poetry.lock
 pyproject.toml
 replit.nix
 venv
+# PyInstaller
+build
+dist

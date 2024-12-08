@@ -51,7 +51,7 @@ class ApiWargaming:
             response_data = response['data'][0]
             return response_data['account_id'], response_data['nickname']
         except Exception as error:
-            print('ApiWargaming.get_player_by_nick\n' + str(error))
+            print(f'ApiWargaming.get_player_by_nick({nickname})\n{error}')
             return None
 
     def get_player_by_id(self, player_id: str) -> tuple | None:
@@ -75,23 +75,26 @@ class ApiWargaming:
             print('ApiWargaming.get_player_by_id\n' + str(error))
             return None
 
-    def get_clan_by_player_id(self, clan_id: int) -> tuple | None:
+    def get_clan_by_player_id(self, player_id: int) -> tuple | None:
         """
         Search the player's clan's id by the player's ID.
 
         Args:
-            clan_id: the ID of the player.
+            player_id: the ID of the player.
 
         Returns:
             it contains the clan ID. If the player has not a clan, it returns `None`.
         """
-        url = self.url_player_clan_data + str(clan_id)
+        url = self.url_player_clan_data + str(player_id)
         response = check_data(url)
+        if response is None:
+            return -1
         try:
             response_data = response['data']
-            return response_data[str(clan_id)]['clan_id']
-        except Exception as error:
-            print('ApiWargaming.get_clan_by_player_id\n' + str(error))
+            return response_data[str(player_id)]['clan_id']
+        except Exception as _:
+            print(f'ApiWargaming.get_clan_by_player_id({player_id})')
+            print(response_data)
             return None
 
     def get_clan_name_by_id(self, clan_id: int) -> tuple | None:
@@ -106,12 +109,14 @@ class ApiWargaming:
         """
         url = self.url_clan_details + str(clan_id)
         response = check_data(url)
+        if response is None:
+            return (-1, None)
         try:
             response_data = response['data']
             return response_data[str(clan_id)]['name'], response_data[str(
                 clan_id)]['tag']
         except Exception as error:
-            print('ApiWargaming.get_clan_name_by_id\n' + str(error))
+            print(f'ApiWargaming.get_clan_name_by_id({clan_id})\n{error}')
             return None
 
     def get_player_ships(self, playerId: int) -> list:

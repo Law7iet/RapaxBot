@@ -1,9 +1,8 @@
 from os import system
 from settings import config
-from settings.keep_alive import keep_alive
 from disnake import Intents, HTTPException, ApplicationCommandInteraction
 from disnake.ext import commands, tasks
-from utils.constants import RAPAX_GUILD
+from utils.constants import IMPERIUM_GUILD
 
 if __name__ == "__main__":
 
@@ -11,8 +10,8 @@ if __name__ == "__main__":
     intents = Intents.default()
     intents.members = True
     bot = commands.InteractionBot(intents=intents,
-                                  test_guilds=[RAPAX_GUILD])
-    extensions = ["moderation", "entertainment", "event", "nickname"]
+                                  test_guilds=[IMPERIUM_GUILD])
+    extensions = ["moderation", "nickname", "event"]
     for extension in extensions:
         try:
             bot.load_extension("extensions." + extension)
@@ -31,7 +30,6 @@ if __name__ == "__main__":
 
     # Run bot
     try:
-        keep_alive()
         bot.run(config.data["DISCORD_TOKEN"])
     except HTTPException as e:
         if e.status == 429:

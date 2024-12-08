@@ -1,3 +1,5 @@
+import sys
+import os
 import asyncio
 from typing import Union
 
@@ -61,3 +63,10 @@ async def send_response_and_clear(inter: Union[ApplicationCommandInteraction,
     await asyncio.sleep(5)
     message = await inter.original_message()
     await message.delete()
+
+
+def get_base_path():
+    """Ottieni il percorso base del file eseguibile o dello script."""
+    if getattr(sys, "frozen", False):  # Se è un eseguibile PyInstaller
+        return sys._MEIPASS
+    return os.path.abspath(".")
