@@ -19,7 +19,7 @@ a = Analysis(
         ('./utils/functions.py', './utils'),
         ('./utils/modal.py', './utils')
     ],
-    hiddenimports=[],
+    hiddenimports=['disnake.ext.tasks'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
