@@ -7,7 +7,7 @@ import requests
 from disnake import ApplicationCommandInteraction, ModalInteraction
 from disnake.utils import get
 
-from constants import AuthorizationLevelEnum, authorizationLevel
+from utils.constants import AuthorizationLevelEnum, authorizationLevel
 
 
 # Some Functions
@@ -22,7 +22,7 @@ def check_data(url: str) -> dict | None:
         the url response. If the request is invalid, it return None.
     """
     # send request
-    reply = requests.get(url=url)
+    reply = requests.get(url=url, timeout=30)
     data = reply.json()
     # check data errors
     if data['status'] != 'ok':

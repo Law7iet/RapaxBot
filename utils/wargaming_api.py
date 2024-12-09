@@ -119,19 +119,19 @@ class ApiWargaming:
             print(f'ApiWargaming.get_clan_name_by_id({clan_id})\n{error}')
             return None
 
-    def get_player_ships(self, playerId: int) -> list:
+    def get_player_ships(self, player_id: int) -> list:
         """
         Returns the list of the player's ships.
         Args:
-            playerId: the player ID.
+            player_id: the player ID.
         Returns:
             the players' ships.
         """
         ships = []
-        response_member_data = check_data(self.url_player_ships + str(playerId))
+        response_member_data = check_data(self.url_player_ships + str(player_id))
         if response_member_data is None:
             return ships
-        for ship in response_member_data['data'][str(playerId)]:
+        for ship in response_member_data['data'][str(player_id)]:
             ships.append(ship['ship_id'])
         return ships
 

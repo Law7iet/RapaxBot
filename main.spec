@@ -8,16 +8,13 @@ a = Analysis(
     datas=[
         ('./config.json', './'),
         
-        ('./extensions/entertainment.py', './extensions'),
         ('./extensions/event.py', './extensions'),
         ('./extensions/moderation.py', './extensions'),
         ('./extensions/nickname.py', './extensions'),
         
         ('./settings/config.py', './settings'),
-        ('./settings/keep_alive.py', './settings'),
-        ('./settings/restarter.py', './settings'),
         
-        ('./utils/apiWargaming.py', './utils'),
+        ('./utils/wargaming_api.py', './utils'),
         ('./utils/constants.py', './utils'),
         ('./utils/functions.py', './utils'),
         ('./utils/modal.py', './utils')

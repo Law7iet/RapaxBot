@@ -1,7 +1,8 @@
 from os import system
-from settings import config
 from disnake import Intents, HTTPException, ApplicationCommandInteraction
-from disnake.ext import commands, tasks
+from disnake.ext import commands
+
+from settings import config
 from utils.constants import IMPERIUM_GUILD
 
 if __name__ == "__main__":
@@ -16,17 +17,13 @@ if __name__ == "__main__":
         try:
             bot.load_extension("extensions." + extension)
         except Exception as error:
-            print("{} cannot be loaded. [{}]".format(extension, error))
+            print(f"{extension} cannot be loaded. [{error}]")
 
     # Bot test slash command
     @bot.slash_command(description="Pong!")
     async def ping(inter: ApplicationCommandInteraction):
         await inter.response.send_message("Pong! `" + str(round(bot.latency * 1000)) + "ms`")
 
-    # Bot loop
-    @tasks.loop(seconds=10.0)
-    async def foo():
-        return
 
     # Run bot
     try:

@@ -1,5 +1,5 @@
 from disnake import TextInputStyle, Role, TextChannel, ModalInteraction, ui, Embed
-from functions import send_response_and_clear
+from utils.functions import send_response_and_clear
 
 
 class Modal(ui.Modal):

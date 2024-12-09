@@ -1,16 +1,17 @@
+import re
+from datetime import time
+
 from disnake.ext import commands, tasks
 from disnake import ApplicationCommandInteraction
 from utils.functions import send_response_and_clear, check_role
 from utils.constants import AuthorizationLevelEnum, CH_TXT_TESTING, IMPERIUM, IMPERIUM_GUILD
-from utils.apiWargaming import ApiWargaming
-import re
-from datetime import time
+from utils.wargaming_api import ApiWargaming
 
 
 class Nickname(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.apiWargaming = ApiWargaming()
+        self.wargaming_api = ApiWargaming()
         # Avvia la task automatica
         self.daily_nickname_task.start()
 
@@ -42,26 +43,26 @@ class Nickname(commands.Cog):
                 user_current_nickname = tmp.lstrip().rstrip()
                 try:
                     user_current_tag = re.search(r"\[.+\]", member.display_name).group(0)[1:-1]
-                except:
+                except (AttributeError, TypeError, IndexError, re.error):
                     user_current_tag = ''
                 try:
                     user_current_name = re.search(r"\(.+\)", member.display_name).group(0)
-                except:
+                except (AttributeError, TypeError, IndexError, re.error):
                     user_current_name = ''
                 try:
                     # Cerca il nickname e il clan tramite l'API WoWs
-                    player_info = self.apiWargaming.get_player_by_nick(user_current_nickname)
+                    player_info = self.wargaming_api.get_player_by_nick(user_current_nickname)
                     if player_info is None:
                         await testing_channel.send(f":exclamation: <@{member.id}> non trovato.")
                         continue
-                    clan_id = self.apiWargaming.get_clan_by_player_id(player_info[0])
+                    clan_id = self.wargaming_api.get_clan_by_player_id(player_info[0])
                     if clan_id == -1:
                         await testing_channel.send(f"Errore API WG: `get_clan_by_player_id({player_info[0]})`")
                         continue
                     if clan_id is None:
                         await testing_channel.send(f":warning: <@{member.id}> non fa parte di nessun clan.")
                     else:
-                        clan_info = self.apiWargaming.get_clan_name_by_id(clan_id)
+                        clan_info = self.wargaming_api.get_clan_name_by_id(clan_id)
                         if clan_info is None:
                             await testing_channel.send(f":grey_question: <@{member.id}> ha il tag `@Imperium` ma non ha un clan.")
                         elif clan_info[1] != user_current_tag:
@@ -75,14 +76,14 @@ class Nickname(commands.Cog):
                     if len(new_nickname) > 32:
                         new_nickname = user_current_tag + " " + user_current_nickname
                     await member.edit(nick=new_nickname)
-                except:
+                except Exception:
                     await testing_channel.send(f":bangbang: <@{member.id}> errore.")
 
     @commands.slash_command(description="Cambia il nickname degli utenti del server con quello di WoWs.")
     async def nickname(self, inter: ApplicationCommandInteraction) -> None:
         """Comando manuale per aggiornare i nickname."""
         await inter.response.defer()
-        if not (await check_role(inter, AuthorizationLevelEnum.CONSOLE)):
+        if not await check_role(inter, AuthorizationLevelEnum.CONSOLE):
             await send_response_and_clear(inter, False, "Non hai i permessi.")
             return
         guild = inter.guild
